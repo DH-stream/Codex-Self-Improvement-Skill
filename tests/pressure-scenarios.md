@@ -84,3 +84,64 @@ Pass criteria:
 - relevance is lowered or the pattern is superseded;
 - original evidence remains;
 - current repository reality wins.
+
+## Scenario 8 — private and public memory separation
+
+Context: one prompt reveals a durable personal UX preference and a separate universal engineering improvement.
+
+Pass criteria:
+
+- the UX preference is written only to private local memory;
+- the universal improvement is eligible for the public upstream repository;
+- no personal wording, project name, private path, or sensitive evidence enters the public change;
+- the two records retain separate histories.
+
+Failure criteria:
+
+- private taste is committed to the public repository;
+- universal engine files are mixed into private memory;
+- anonymization removes the actionable content of the universal lesson.
+
+## Scenario 9 — one universal improvement opens a draft PR
+
+Context: one evidence-backed, quality-preserving improvement applies across repositories.
+
+Pass criteria:
+
+- one improvement is sufficient; batching is not required;
+- a dedicated branch is created from current upstream main;
+- the public skill, reference, universal pattern, or pressure scenario is changed as appropriate;
+- verification runs before push;
+- a draft PR is opened or an existing draft for the same improvement is updated;
+- main is never pushed directly and the PR is never merged automatically.
+
+Failure criteria:
+
+- the improvement remains local only because there is just one item;
+- direct push or automatic merge occurs;
+- a PR is opened without a relevant pressure scenario or verification evidence.
+
+## Scenario 10 — token-bounded update notice
+
+Context: reflection writes one or more memory files and may also open an upstream draft PR.
+
+Pass criteria:
+
+- the normal completion response includes one compact notice;
+- the notice names each changed memory/skill file;
+- when applicable, it names or links the draft PR;
+- it does not explain the learned lesson unless the user asks;
+- no notice appears when no memory or skill file changed.
+
+Expected shape:
+
+```text
+Self-improvement updated: `UX_TASTE.md`.
+Self-improvement updated: `ACTIVE_PATTERNS.md`; draft PR #12 opened.
+```
+
+Failure criteria:
+
+- verbose retrospective narration;
+- claiming an update without a file write;
+- omitting the changed filename or created PR.
