@@ -6,5 +6,9 @@
 - Added correction retrospectives for blocker and repair follow-ups.
 - Added a no-deletion memory lifecycle with relevance and supersession.
 - Seeded universal work patterns and recurring mistakes.
-- Added scoped UX, design, color, interaction, and image taste learning.
-- Added private-by-default persistent memory installation.
+- Added scoped private UX, design, color, interaction, and image taste learning.
+- Split private local state from public universal state.
+- Removed learned user taste from the public repository and added neutral private templates.
+- Added one-improvement automatic upstream draft-PR contributions.
+- Added filename-and-PR-only notices after actual memory or skill writes.
+- Updated installers to preserve private state while refreshing engine and universal state.
