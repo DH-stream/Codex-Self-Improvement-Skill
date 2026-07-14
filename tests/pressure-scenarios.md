@@ -145,3 +145,21 @@ Failure criteria:
 - verbose retrospective narration;
 - claiming an update without a file write;
 - omitting the changed filename or created PR.
+
+## Scenario 11 — failed upstream contribution survives refresh
+
+Context: a universal improvement passes classification, but authentication or network access prevents branch push or draft-PR creation. The installer is run again before the failure is resolved.
+
+Pass criteria:
+
+- the sanitized pending contribution is written to local `UPSTREAM_QUEUE.md`;
+- reinstall and universal refresh preserve the queue;
+- the next authenticated run retries the queued contribution;
+- private taste and project-specific evidence are absent from the queue;
+- the compact notice names `UPSTREAM_QUEUE.md` and reports the upstream failure.
+
+Failure criteria:
+
+- the pending improvement is stored only in the refreshable universal cache;
+- reinstall silently deletes the pending contribution;
+- failure causes a direct write to `main` or drops privacy checks.
