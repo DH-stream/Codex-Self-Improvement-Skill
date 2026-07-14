@@ -24,6 +24,7 @@ GitHub repository / universal state
 Local private state
 ├── user UX/design taste
 ├── private evidence and candidates
+├── pending sanitized upstream contributions
 ├── private history
 └── private update log
 ```
@@ -89,7 +90,8 @@ The installers:
 - refresh the global skill under `~/.codex/skills/codex-self-improvement`;
 - refresh public universal state under `~/.codex/self-improvement/universal`;
 - seed private state under `~/.codex/self-improvement/private` only when files are missing;
-- preserve existing private taste during reinstall and migrate the first installer layout;
+- preserve existing private taste and `UPSTREAM_QUEUE.md` during reinstall;
+- migrate taste files from the first installer layout;
 - record private, universal, and upstream locations;
 - maintain one idempotent activation block in `~/.codex/AGENTS.md`.
 
@@ -104,7 +106,7 @@ When Codex finds one qualified universal improvement, it may automatically:
 5. push the branch and open or update a draft PR;
 6. leave the PR unmerged for human review.
 
-Authentication or upstream failure keeps the sanitized observation in universal candidates and does not touch `main`.
+Authentication or upstream failure stores the sanitized contribution in local `UPSTREAM_QUEUE.md`. That queue survives reinstall and is retried on a later authenticated run; `main` remains untouched.
 
 ## Normal visibility
 
@@ -115,6 +117,7 @@ An actual write adds one compact line to the normal completion response:
 ```text
 Self-improvement updated: `UX_TASTE.md`.
 Self-improvement updated: `ACTIVE_PATTERNS.md`; draft PR #12 opened.
+Self-improvement updated: `UPSTREAM_QUEUE.md`; upstream draft PR failed.
 ```
 
 The lesson itself is omitted unless requested, keeping the mechanism useful without spending tokens on routine retrospective prose.
