@@ -25,20 +25,20 @@ for source in "$MEMORY_SOURCE"/*; do
   cp "$source" "$UNIVERSAL_TARGET/$(basename "$source")"
 done
 
-# Private state is seeded once and is never overwritten by reinstall or sync.
-for source in "$PRIVATE_TEMPLATE"/*; do
-  [[ -f "$source" ]] || continue
-  destination="$PRIVATE_TARGET/$(basename "$source")"
-  [[ -e "$destination" ]] || cp "$source" "$destination"
-done
-
-# Preserve taste learned by the first installer layout.
+# Preserve taste learned by the first installer layout before applying templates.
 for name in UX_TASTE.md UX_TASTE_HISTORY.md; do
   legacy="$LEGACY_MEMORY/$name"
   destination="$PRIVATE_TARGET/$name"
   if [[ -f "$legacy" && ! -e "$destination" ]]; then
     cp "$legacy" "$destination"
   fi
+done
+
+# Private state is seeded once and is never overwritten by reinstall or sync.
+for source in "$PRIVATE_TEMPLATE"/*; do
+  [[ -f "$source" ]] || continue
+  destination="$PRIVATE_TARGET/$(basename "$source")"
+  [[ -e "$destination" ]] || cp "$source" "$destination"
 done
 
 printf '%s\n' "$PRIVATE_TARGET" > "$STATE_ROOT/PRIVATE_LOCATION"
