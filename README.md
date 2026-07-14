@@ -169,7 +169,7 @@ Remaining external gates:
 - authenticated GitHub end-to-end branch discovery, push, partial-failure retry, and draft-PR creation;
 - Windows PowerShell execution of the PowerShell installer regression suite.
 
-See [`tests/verification-report.md`](tests/verification-report.md) for the evidence and limitations.
+See the [`README launch verification report`](tests/verification-report-readme-launch.md) for this change and the preserved [`original skill verification report`](tests/verification-report.md) for the initial engine release.
 
 ## Start exploring
 
