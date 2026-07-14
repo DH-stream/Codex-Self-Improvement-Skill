@@ -17,3 +17,9 @@
 - Trigger condition: behavior is broken while the existing styling is already approved.
 - Failure mode: the visual layer is replaced or simplified during logic changes.
 - Detection rule: preserve the accepted visual contract and compare before/after appearance.
+
+## mistake-004 — Subagent orchestration becomes the work
+
+- Trigger condition: a multi-step plan and subagent support are available.
+- Failure mode: one worker plus one reviewer is dispatched for every routine task, adding repeated context transfer and avoidable latency to sequential work.
+- Detection rule: before dispatch, name the independent parallel stream or specialist risk that justifies the coordination cost; otherwise execute inline and review the integrated diff once.
