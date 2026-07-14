@@ -126,3 +126,26 @@ Desired behavior:
 - assign a stable contribution ID and deterministic branch name;
 - record status, base SHA, branch, attempts, and last retry;
 - retry once per session or natural consolidation point and reuse existing remote state.
+
+## Baseline I — installer changed active state before proving replacement
+
+Executable RED tests against the shell installer exposed three failures:
+
+```text
+missing source preserves existing install: FAIL
+shell installer has no Python runtime dependency: FAIL
+universal refresh removes stale directories: FAIL
+```
+
+Observed failure:
+
+- the active skill directory was deleted before source validation and copy completed;
+- the documented macOS/Linux path depended on `python3` without declaring it;
+- universal refresh deleted only top-level files and left stale nested directories.
+
+Desired behavior:
+
+- validate all source inputs and stage complete replacements first;
+- use shell tools available in the documented environment without an undeclared Python dependency;
+- replace the universal snapshot as a complete directory;
+- reject malformed activation markers before changing active installation files.
