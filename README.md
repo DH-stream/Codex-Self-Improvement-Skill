@@ -4,44 +4,45 @@ A global, fire-and-forget learning system for Codex.
 
 It improves two things over time:
 
-1. **Engineering judgment and efficiency** — how Codex explores, implements, tests, reviews, and reports without wasting usage or weakening quality.
+1. **Engineering judgment and efficiency** — exploration, implementation, testing, review, and reporting without wasting usage or weakening quality.
 2. **Private user taste** — durable preferences in UX, design, color, copy, interaction, visual polish, and image work.
 
-The system runs automatically after prompts that change technical repository files. Corrections and blocker follow-ups trigger a deeper retrospective: not only “how do I fix this?”, but “what evidence or check would have exposed this during the first implementation?”
+Technical file changes trigger a bounded efficiency reflection. Explicit durable feedback and review/correction signals are evaluated independently, so useful learning is not lost merely because implementation is deferred.
 
 ## Public and private layers
 
-The installation deliberately separates learning:
-
 ```text
-GitHub repository / universal state
+GitHub repository / writable universal source
 ├── skill engine and references
 ├── universal work patterns
 ├── recurring engineering mistakes
 ├── pressure scenarios and verification
 └── neutral private-memory templates
 
-Local private state
+Installed universal snapshot / read-only
+└── copy of public upstream main used for lookup and deduplication
+
+Local private state / writable
 ├── user UX/design taste
 ├── private evidence and candidates
-├── pending sanitized upstream contributions
+├── sanitized upstream retry queue
 ├── private history
 └── private update log
 ```
 
-Personal taste and private evidence never enter GitHub. Universal improvements are sanitized, pressure-tested, verified, and proposed through a dedicated draft PR.
+Personal taste and private evidence never enter GitHub. Universal proposals are authored only in isolated upstream branches/worktrees. The installed universal snapshot is never used as a second writable source.
 
 ## Principles
 
-- One global engine is shared across every repository.
+- One global engine is shared across repositories.
 - Project facts stay project-local.
 - Personal taste stays local and private.
-- Public memory contains only universal, anonymized, quality-preserving improvements.
-- One qualified universal improvement is enough to open a draft PR; batching is not required.
-- Codex never pushes directly to `main` and never merges automatically.
+- One qualified universal improvement is enough to open a draft PR.
+- Stable contribution IDs and deterministic branches prevent duplicate retries.
+- Codex never pushes directly to `main`, merges automatically, approves, or marks its own update ready for review.
 - Reflection is silent when it writes nothing.
-- Actual memory/skill writes produce one compact notice naming changed files and any draft PR.
-- Nothing is deleted. Old knowledge is marked low-relevance or superseded.
+- Actual memory/skill writes produce one compact filename/PR notice.
+- Learned history is preserved; old knowledge becomes low-relevance or superseded.
 - Quality, safety, TDD, review, and final verification are never traded for token savings.
 
 ## Repository layout
@@ -53,8 +54,9 @@ skills/codex-self-improvement/       Installable skill and procedures
 memory/*.md                          Public universal seed state
 memory/private-template/             Neutral templates for private local state
 install/AGENTS-snippet.md            Global activation hook
-install.ps1 / install.sh             Idempotent installers
-tests/                               Pressure scenarios and verification evidence
+install.ps1 / install.sh             Idempotent staged installers
+tests/test-install.sh                Executable shell installer regressions
+tests/pressure-scenarios.md          Agent behavior scenarios
 docs/superpowers/                    Designs and implementation plans
 ```
 
@@ -68,7 +70,7 @@ cd Codex-Self-Improvement-Skill
 ./install.ps1
 ```
 
-An alternative upstream checkout may be supplied with `-UpstreamCheckout`. The configured public repository may be changed with `-UpstreamRepository`.
+Optional parameters: `-UpstreamCheckout` and `-UpstreamRepository`.
 
 ### macOS/Linux
 
@@ -78,7 +80,14 @@ cd Codex-Self-Improvement-Skill
 ./install.sh
 ```
 
-Environment overrides:
+Runtime overrides:
+
+```text
+UPSTREAM_LOCATION
+UPSTREAM_REPOSITORY
+```
+
+Legacy installer aliases remain accepted:
 
 ```text
 SELF_IMPROVEMENT_UPSTREAM_CHECKOUT
@@ -87,32 +96,35 @@ SELF_IMPROVEMENT_UPSTREAM_REPOSITORY
 
 The installers:
 
-- refresh the global skill under `~/.codex/skills/codex-self-improvement`;
-- refresh public universal state under `~/.codex/self-improvement/universal`;
-- seed private state under `~/.codex/self-improvement/private` only when files are missing;
-- preserve existing private taste and `UPSTREAM_QUEUE.md` during reinstall;
+- validate required sources before changing active files;
+- stage complete skill, universal, and activation-hook replacements;
+- refresh `~/.codex/skills/codex-self-improvement`;
+- refresh the read-only universal snapshot under `~/.codex/self-improvement/universal`;
+- seed private files only when missing;
+- preserve private taste and `UPSTREAM_QUEUE.md`;
 - migrate taste files from the first installer layout;
-- record private, universal, and upstream locations;
-- maintain one idempotent activation block in `~/.codex/AGENTS.md`.
+- record private, universal, checkout, and repository locations;
+- maintain exactly one marked block in `~/.codex/AGENTS.md`.
+
+The shell installer uses standard Bash/awk tooling and has no Python runtime dependency.
 
 ## Universal self-updates
 
-When Codex finds one qualified universal improvement, it may automatically:
+For one qualified universal improvement, Codex may automatically:
 
-1. use the configured upstream checkout;
-2. create an isolated branch from current upstream `main`;
-3. add RED/pressure evidence and the smallest complete improvement;
-4. run available verification and inspect the complete public diff for privacy;
-5. push the branch and open or update a draft PR;
-6. leave the PR unmerged for human review.
+1. derive a stable contribution ID and deterministic branch;
+2. inspect the queue, remote branches, and open draft PRs for an existing match;
+3. fetch current remote `main` and create an isolated worktree;
+4. add RED/pressure evidence and the smallest complete public-safe change;
+5. run available verification and inspect the complete diff for privacy;
+6. push the branch and open or update a draft PR;
+7. leave the PR unmerged for human review.
 
-Authentication or upstream failure stores the sanitized contribution in local `UPSTREAM_QUEUE.md`. That queue survives reinstall and is retried on a later authenticated run; `main` remains untouched.
+Authentication or network failure updates the sanitized record in local `UPSTREAM_QUEUE.md`. Active entries retry at most once per session or natural consolidation point. A confirmed draft PR changes the record to `status: pr-open`; history is preserved.
 
 ## Normal visibility
 
-No memory/skill change means no self-improvement narration.
-
-An actual write adds one compact line to the normal completion response:
+No memory/skill change means no self-improvement narration. An actual write adds one compact line:
 
 ```text
 Self-improvement updated: `UX_TASTE.md`.
@@ -120,6 +132,15 @@ Self-improvement updated: `ACTIVE_PATTERNS.md`; draft PR #12 opened.
 Self-improvement updated: `UPSTREAM_QUEUE.md`; upstream draft PR failed.
 ```
 
-The lesson itself is omitted unless requested, keeping the mechanism useful without spending tokens on routine retrospective prose.
+The lesson itself is omitted unless requested.
+
+## Verify
+
+```bash
+bash -n install.sh
+bash tests/test-install.sh
+```
+
+Fresh-agent pressure scenarios and an authenticated end-to-end upstream PR run remain separate behavioral gates.
 
 See [`CORE.md`](CORE.md) and the installed [`SKILL.md`](skills/codex-self-improvement/SKILL.md).
