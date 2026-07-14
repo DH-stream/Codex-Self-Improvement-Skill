@@ -12,3 +12,4 @@
 - Added one-improvement automatic upstream draft-PR contributions.
 - Added filename-and-PR-only notices after actual memory or skill writes.
 - Updated installers to preserve private state while refreshing engine and universal state.
+- Added persistent `UPSTREAM_QUEUE.md` retry state for contributions blocked by authentication or network access.
