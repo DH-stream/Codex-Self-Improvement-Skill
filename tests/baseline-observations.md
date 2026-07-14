@@ -1,6 +1,6 @@
 # Baseline observations (RED)
 
-These are observed failures before this skill existed. They are the RED evidence for the first version.
+These are observed failures before this skill existed, plus structural gaps found while evolving the initial version.
 
 ## Baseline A — unbounded agent work
 
@@ -47,3 +47,20 @@ Desired behavior:
 - treat established visual direction as a contract;
 - fix behavior without silent restyling;
 - learn explicit UX corrections globally with scope.
+
+## Baseline D — initial public/private storage gap
+
+Inspection of the first skill version showed that public seed memory contained actual user-specific UX preferences and that the engine had no contract for proposing universal improvements back to its GitHub repository.
+
+Observed failure:
+
+- private taste and universal engine data shared one storage concept;
+- a universal improvement could update local memory but had no automatic upstream contribution path;
+- the visibility contract was either silent or lesson-heavy rather than a fixed, token-bounded file notice.
+
+Desired behavior:
+
+- keep personal taste and private evidence exclusively local;
+- keep the GitHub repository limited to universal engine, schema, tests, and universal patterns;
+- allow one qualified universal improvement to open a verified draft PR automatically;
+- report only changed filenames and the draft PR reference unless more detail is requested.
