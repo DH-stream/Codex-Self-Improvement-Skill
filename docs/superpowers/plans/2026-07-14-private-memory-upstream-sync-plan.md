@@ -72,8 +72,6 @@
 
 ### Task 7: Second-review contract hardening
 
-**Files:** `SKILL.md`, reflection/memory/upstream references, `CORE.md`, `AGENTS.md`, activation snippet, private queue template, scenarios, baseline evidence.
-
 - [x] Add RED scenarios for feedback-only prompts, competing universal sources, and non-idempotent retry.
 - [x] Evaluate explicit durable feedback and correction signals before the technical file-change gate.
 - [x] Make `UNIVERSAL_LOCATION` read-only and author proposals only in isolated upstream branches.
@@ -81,8 +79,6 @@
 - [x] Require current remote `main`, duplicate discovery, and existing branch/PR reuse.
 
 ### Task 8: Installer safety and executable verification
-
-**Files:** `install.sh`, `install.ps1`, `tests/test-install.sh`, scenarios, baseline evidence.
 
 - [x] Write executable tests and observe three RED failures in the previous shell installer.
 - [x] Preflight all required sources and activation markers before changing active files.
@@ -95,12 +91,12 @@
 
 ### Task 9: Final review and evidence refresh
 
-- [ ] Recount skill/reference/scenario structure.
-- [ ] Run fresh shell syntax and executable installer tests.
-- [ ] Run static PowerShell checks on the final script.
-- [ ] Review the complete final diff against current `main` for behavior and privacy.
-- [ ] Refresh `tests/verification-report.md` and the draft PR body.
-- [ ] Confirm PR remains draft and unmerged.
+- [x] Recount skill/reference/scenario structure.
+- [x] Run fresh shell syntax and executable installer tests.
+- [x] Run static PowerShell checks on the final script.
+- [x] Review the complete final diff against current `main` for behavior and privacy.
+- [x] Refresh `tests/verification-report.md` and the draft PR body.
+- [x] Confirm PR remains draft and unmerged.
 
 ## Remaining external gates
 
