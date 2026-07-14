@@ -1,65 +1,36 @@
-# Verification report — self-updating skill
+# Verification report — friendly README and streamed installers
 
 Date: 2026-07-14
-Branch: `chatgpt/fire-and-forget-self-improvement`
-Base: `main` at `4abdeb8f8ef16f59c28616a9bfe874fc30c510b9`
-Code/diff reviewed through head: `46d016904aeafe5b0aae2360ca8a22a62036287f`
 
-## Skill structure
+## Scope reviewed
 
-Fresh checks:
+- Compared branch `readme/friendly-open-source-launch` against current `main` at `228160a3da536b557e29436c539896b774b39817`.
+- Reviewed the actual branch versions of `install.sh`, `install.ps1`, both installer test runners, `README.md`, the skill/invariant changes, universal memory updates, and all four brand assets.
+- The implementation review was performed through branch head `a791470386c94c54f4ee3b88b99dd7fb7a25245a` before this report was added.
 
-```text
-SKILL.md frontmatter: valid
-name: codex-self-improvement
-description begins with Use when: yes
-SKILL.md word count: 468
-required references found: 5/5
-pressure scenarios: 15
-executable installer regression file: present
-```
+## RED/GREEN evidence
 
-The five required references are:
-
-- `reflection-procedure.md`
-- `correction-retrospective.md`
-- `memory-schema.md`
-- `taste-learning.md`
-- `upstream-contribution.md`
-
-Result: PASS.
-
-## Second code review findings and corrections
-
-A fresh review of the actual PR code against `main` found and corrected four load-bearing issues:
-
-1. Explicit durable feedback and review-only corrections were skipped when no repository file changed.
-2. Installed universal memory and GitHub branches could act as competing writable sources.
-3. Queue retries lacked stable identity, deterministic branches, and bounded automatic retry.
-4. The shell installer changed active state before complete preflight/staging, depended on Python, and left stale nested universal paths.
-
-The corrected contracts now:
-
-- evaluate feedback/correction signals independently from the technical-change gate;
-- treat `UNIVERSAL_LOCATION` as a read-only upstream snapshot;
-- author universal proposals only in isolated branches/worktrees based on current remote `main`;
-- use stable contribution IDs, deterministic branches, machine-scannable queue states, existing branch/PR discovery, and once-per-session/natural-gate retries;
-- stage and validate complete installer replacements before activation.
-
-## Executable shell installer RED/GREEN
-
-The previous shell installer was exercised against three new regression tests before production edits.
-
-Observed RED:
+The streamed Bash tests were observed failing before bootstrap support existed:
 
 ```text
-FAIL: missing source preserves existing install
-FAIL: shell installer has no Python runtime dependency
-FAIL: universal refresh removes stale directories
-Installer tests: 0 passed, 3 failed
+Installer tests: 6 passed, 2 failed
 ```
 
-Fresh final commands:
+A later repository-retargeting test was also observed failing before origin replacement was implemented:
+
+```text
+Installer tests: 8 passed, 1 failed
+```
+
+After implementation, the complete Bash suite produced:
+
+```text
+Installer tests: 9 passed, 0 failed
+```
+
+## Fresh executable verification
+
+Commands run in the isolated local fixture:
 
 ```bash
 bash -n install.sh
@@ -67,64 +38,39 @@ bash -n tests/test-install.sh
 bash tests/test-install.sh
 ```
 
-Observed GREEN:
+Result: shell syntax passed and all nine installer regressions passed. The suite covers local preflight safety, no Python dependency, complete universal refresh, private-state preservation, malformed activation markers, streamed fresh install, failed-bootstrap preservation, streamed refresh, and repository retargeting.
 
-```text
-PASS: missing source preserves existing install
-PASS: shell installer has no Python runtime dependency
-PASS: universal refresh removes stale directories
-PASS: reinstall preserves private state and refreshes universal snapshot
-PASS: unmatched AGENTS markers fail before activation
-Installer tests: 5 passed, 0 failed
-```
+## PowerShell verification
 
-The final tests also verify that a pending private `UPSTREAM_QUEUE.md` record survives reinstall, the universal snapshot refreshes, and only one activation marker remains.
+`install.ps1` and `tests/test-install.ps1` were reviewed as complete files against `main`. Lightweight lexical/static checks passed for balanced delimiters, here-strings, required bootstrap functions, persistent-checkout paths, fast-forward pulls, and repository overrides.
 
-The verification container could not resolve `github.com`, so the exact final `install.sh` and `tests/test-install.sh` contents were mirrored into an isolated fixture with the required repository layout rather than cloned over the network.
+A PowerShell runtime was not available in the execution environment, so the PowerShell regression runner was not executed. Windows PowerShell execution remains a release gate.
 
-Result: PASS for shell syntax and executable behavior.
+## Skill and behavior verification
 
-## PowerShell installer
+- `SKILL.md`: valid frontmatter, 476 words, and all 5 required references present.
+- Universal execution policy: one primary agent inline by default; subagents only for justified independent parallel work or specialist risk.
+- Pressure coverage: 15 original scenarios plus the dedicated Scenario 16 file for subagent coordination cost.
+- Public/private separation and no-auto-merge invariants remain intact.
 
-The complete final `install.ps1` was reviewed against the shell contract. It contains:
+## README and brand verification
 
-- source/template/snippet preflight;
-- root-destination rejection;
-- documented environment and parameter precedence;
-- staged skill, universal, and AGENTS replacements;
-- activation-marker validation before replacement;
-- private memory and queue preservation;
-- backup/rollback for active skill, universal snapshot, and AGENTS file;
-- four location/repository files;
-- cleanup through `finally`.
+- Both requested one-line install commands are separate fenced code blocks.
+- All repository-relative README links and four brand asset paths resolve.
+- `hero.svg`, `bot-mark.svg`, `privacy-memory.svg`, and `workflow.svg` parse as valid XML/SVG.
+- Local raster previews were rendered and inspected at 1600×620, 512×512, 1500×440, and 1600×420.
+- Assets contain no third-party logos, private user data, or embedded metadata.
+- README claims were checked against the actual installers and current branch files.
 
-Limitation: no PowerShell runtime was available, so this is a static code review, not an executed PowerShell test.
+## Review findings corrected before PR
 
-## Public/private and upstream review
+- Corrected the README test count from eight to nine.
+- Used repository-local SVG assets for crisp GitHub rendering while retaining locally rendered PNG previews for visual inspection.
+- Added repository-origin retargeting coverage so `UPSTREAM_REPOSITORY` does not silently keep an older managed checkout.
+- Kept the single-agent default explicit in `CORE.md`, `AGENTS.md`, `SKILL.md`, universal patterns, baseline evidence, and a pressure scenario.
 
-The complete PR diff against `main` was reviewed, not only the PR description.
+## Remaining external gates
 
-Assertions:
-
-```text
-learned public memory/UX_TASTE.md: absent
-learned public memory/UX_TASTE_HISTORY.md: absent
-neutral private templates: present
-installed universal snapshot documented read-only: yes
-universal proposals routed to isolated upstream branch: yes
-stable contribution ID and deterministic branch: yes
-queue states pending/branch-pushed/pr-open/superseded: yes
-successful queue history preserved: yes
-direct main / auto merge / auto approve / auto ready prohibited: yes
-compact filename/PR notice: yes
-```
-
-Result: PASS for final repository structure and privacy contract.
-
-## Remaining behavioral gates
-
-- Execute `install.ps1` in a real Windows PowerShell environment.
-- Run fresh agent pressure scenarios with and without the installed skill.
-- Run an authenticated Codex/GitHub end-to-end test proving branch discovery/creation, push, partial-failure retry, and draft-PR creation.
-
-The PR must remain draft and unmerged until those gates are reviewed.
+- Execute `tests/test-install.ps1` in a real Windows PowerShell environment.
+- Run fresh-agent pressure scenarios with and without the installed skill.
+- Prove authenticated end-to-end upstream branch discovery, push, partial-failure retry, and draft-PR creation.
