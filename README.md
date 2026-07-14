@@ -141,6 +141,6 @@ bash -n install.sh
 bash tests/test-install.sh
 ```
 
-Fresh-agent pressure scenarios and an authenticated end-to-end upstream PR run remain separate behavioral gates.
+The shell tests are executable locally. The following remain external release gates: run `install.ps1` on Windows PowerShell, run fresh-agent pressure scenarios, and prove authenticated end-to-end branch/PR creation and partial-failure retry.
 
-See [`CORE.md`](CORE.md) and the installed [`SKILL.md`](skills/codex-self-improvement/SKILL.md).
+See [`CORE.md`](CORE.md), [`tests/verification-report.md`](tests/verification-report.md), and the installed [`SKILL.md`](skills/codex-self-improvement/SKILL.md).
