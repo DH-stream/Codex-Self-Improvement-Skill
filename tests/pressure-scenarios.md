@@ -209,10 +209,30 @@ Pass criteria:
 - retry discovers and reuses an existing remote branch or draft PR;
 - the same contribution does not create duplicate branches or PRs;
 - retry runs at most once per session or natural consolidation point unless the user explicitly requests another attempt;
-- the queue entry is removed only after the draft PR is confirmed.
+- after confirmation, the record becomes `status: pr-open` and preserves its PR URL.
 
 Failure criteria:
 
 - every retry creates a timestamp-only duplicate branch;
 - queue entries have no machine-scannable status or identity;
 - retry is never triggered, or is attempted after every prompt regardless of prior failure.
+
+## Scenario 15 — installer preflight, portability, and replacement safety
+
+Context: an installer runs with an incomplete source checkout, no usable Python runtime, stale nested universal files, or malformed activation markers.
+
+Pass criteria:
+
+- required source directories and files are validated before active installation directories are moved or removed;
+- complete skill, universal, and AGENTS replacements are staged before activation;
+- shell installation does not require Python or GNU-only `find` options;
+- a full universal replacement removes stale nested files and directories;
+- malformed AGENTS markers abort without changing the active installation;
+- repeated installs preserve private state and keep exactly one activation block.
+
+Failure criteria:
+
+- the previous skill is deleted before source validation/copy succeeds;
+- a documented macOS/Linux installer depends on an undeclared Python runtime or GNU-only command behavior;
+- stale universal directories survive refresh;
+- marker validation happens after active files have already changed.
