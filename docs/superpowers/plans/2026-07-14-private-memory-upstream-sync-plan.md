@@ -102,7 +102,7 @@
 - [x] **Step 5: Verify private files and pending queue remain unchanged while universal files refresh**
 - [x] **Step 6: Statically verify PowerShell paths and preservation behavior**
 - [x] **Step 7: Review the complete PR diff against `main`**
-- [ ] **Step 8: Update the draft PR summary with exact evidence and limitations**
+- [x] **Step 8: Update the draft PR summary with exact evidence and limitations**
 
 ## Remaining external gates
 
