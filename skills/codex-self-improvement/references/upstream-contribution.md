@@ -12,14 +12,15 @@ A single evidence-backed improvement may enter this flow when it is useful acros
 | Project fact or business rule | Project documentation only |
 | Public-safe universal pattern | Universal memory and upstream draft PR |
 | Engine or schema defect | Skill repository draft PR |
+| Sanitized contribution blocked by upstream access | Local `UPSTREAM_QUEUE.md` |
 
-Files under `PRIVATE_LOCATION` are outside the public contribution surface. Public changes exclude identities, personal facts, local paths, credentials, proprietary code, private repository identifiers, and unnecessary source-project detail.
+Files under `PRIVATE_LOCATION` are outside the public contribution surface. Public changes and queue entries exclude identities, personal facts, local paths, credentials, proprietary code, private repository identifiers, and unnecessary source-project detail.
 
 ## Repository resolution
 
 `UPSTREAM_LOCATION` identifies the local checkout. `UPSTREAM_REPOSITORY` identifies the configured GitHub repository. Matching environment variables take precedence over location files.
 
-An unavailable checkout may be recreated from the configured repository. Authentication or network failure leaves the sanitized observation in universal `CANDIDATES.md`; it does not change the default branch.
+An unavailable checkout may be recreated from the configured repository. Authentication or network failure writes the already-sanitized contribution to local `UPSTREAM_QUEUE.md`; it does not change the default branch. Queued contributions are retried on a later authenticated run and survive reinstall because private local state is not refreshed from GitHub.
 
 ## Branch and PR policy
 
@@ -54,6 +55,16 @@ Behavioral checks that cannot run remain an explicit draft-PR limitation. They a
 
 Private templates may change only as neutral schemas. Learned user data never belongs in them.
 
+## Queue lifecycle
+
+A queue record contains the sanitized improvement, intended public files, verification already performed, remaining blocker, and last retry time.
+
+- Retry when upstream access is next available.
+- Do not rerun expensive verification unless relevant files or upstream `main` changed.
+- Remove the queue record only after the branch and draft PR are confirmed.
+- Preserve the resulting evidence in the public branch and history.
+- Never move ordinary private observations into the queue.
+
 ## Draft PR record
 
 The draft PR states:
@@ -76,10 +87,10 @@ After an upstream write succeeds:
 Self-improvement updated: `ACTIVE_PATTERNS.md`; draft PR #12 opened.
 ```
 
-After a public-safe local candidate write when upstream creation fails:
+After an upstream access failure:
 
 ```text
-Self-improvement updated: `CANDIDATES.md`; upstream draft PR failed.
+Self-improvement updated: `UPSTREAM_QUEUE.md`; upstream draft PR failed.
 ```
 
 The notice names changed memory/skill files and the PR reference only. The lesson is omitted unless requested. A PR is never claimed without a returned number or URL.
