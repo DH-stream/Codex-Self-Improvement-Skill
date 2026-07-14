@@ -2,58 +2,104 @@
 
 Date: 2026-07-14
 Branch: `chatgpt/fire-and-forget-self-improvement`
+Base: `main` at `4abdeb8f8ef16f59c28616a9bfe874fc30c510b9`
 
 ## Skill structure
 
-Automated structural checks:
+Fresh structural checks:
 
 - `SKILL.md` frontmatter starts and ends correctly.
 - Skill name is `codex-self-improvement`.
-- Description begins with `Use when` and contains trigger conditions.
-- `SKILL.md` word count: 375.
-- All four required reference paths exist.
-- Core, routing, memory, taste, history, installer, and activation-hook files exist.
+- Description begins with `Use when` and contains trigger conditions only.
+- `SKILL.md` word count: 495.
+- All five required reference paths are present, including `upstream-contribution.md`.
+- Private, universal, upstream, installer, routing, design, history, and pressure-scenario files are present in the branch diff.
+- Ten pressure scenarios are defined.
 
 Result: PASS.
 
+## Public/private diff review
+
+The complete PR diff against `main` was reviewed through the GitHub API.
+
+Assertions:
+
+```text
+learned memory/UX_TASTE.md in public diff: no
+learned memory/UX_TASTE_HISTORY.md in public diff: no
+neutral memory/private-template/ files present: yes
+private/public storage contract present: yes
+one-improvement upstream draft-PR contract present: yes
+direct-main and automatic-merge prohibitions present: yes
+compact filename/PR notice contract present: yes
+```
+
+Result: PASS for repository structure and final public diff.
+
 ## Shell installer
 
-Commands exercised in an isolated temporary Codex home:
+The verification container could not resolve `github.com`, so it could not clone the branch directly. The exact current `install.sh` content from the GitHub branch was mirrored into an isolated fixture with the same directory layout.
+
+Checks exercised:
 
 ```bash
 bash -n install.sh
 CODEX_HOME=<temp> bash install.sh
 CODEX_HOME=<temp> bash install.sh
-CODEX_HOME=<temp-repo> USE_REPOSITORY_MEMORY=1 bash install.sh
+CODEX_HOME=<legacy-temp> bash install.sh
 ```
 
 Observed assertions:
 
 ```text
+bash syntax: pass
 activation marker count after two installs: 1
-existing learned memory preserved: yes
 installed SKILL.md present: yes
-private memory LOCATION correct: yes
-repository-backed memory LOCATION correct: yes
+existing private UX_TASTE.md preserved: yes
+universal ACTIVE_PATTERNS.md refreshed after source change: yes
+legacy UX_TASTE.md migrated before template seeding: yes
+legacy UX_TASTE_HISTORY.md migrated before template seeding: yes
+PRIVATE_LOCATION correct: yes
+UNIVERSAL_LOCATION correct: yes
+UPSTREAM_LOCATION correct: yes
+UPSTREAM_REPOSITORY correct: yes
 ```
 
-Result: PASS.
+Result: PASS for shell installer behavior.
 
 ## PowerShell installer
 
-Static checks:
+Fresh static checks on the current script:
 
 - parentheses, braces, and brackets balanced;
-- idempotent activation-marker replacement present;
-- learned-memory seed is copied only when the destination file is absent;
-- skill engine files are updated on reinstall.
+- skill and universal directories refresh on reinstall;
+- private templates copy only when destination files are absent;
+- legacy taste migration occurs before template seeding;
+- all four location/repository files are written;
+- idempotent activation-marker replacement remains present.
 
 Result: PASS for static structure.
 
-Limitation: no PowerShell runtime was available in the verification environment, so `install.ps1` was not executed.
+Limitation: no PowerShell runtime was available, so `install.ps1` was not executed.
+
+## Upstream contribution behavior
+
+Structural coverage now includes:
+
+- one qualified universal improvement is sufficient;
+- private files are outside the contribution surface;
+- contribution branches start from current upstream `main`;
+- draft PRs are required;
+- direct `main`, automatic merge, approval, and ready-for-review transitions are forbidden;
+- RED/pressure evidence, fresh verification, and complete diff privacy review are required;
+- authentication failure falls back to universal `CANDIDATES.md` without touching `main`.
+
+The current implementation is itself on draft PR #1, and the branch remains unmerged.
+
+Limitation: the installed skill has not yet been run in a fresh Codex agent with authenticated Git/GitHub CLI to prove autonomous branch push and draft-PR creation end to end.
 
 ## Pressure scenarios
 
-The initial observed RED evidence is recorded in `tests/baseline-observations.md`. Seven reusable pressure scenarios are defined in `tests/pressure-scenarios.md`.
+The RED evidence is recorded in `tests/baseline-observations.md`. Ten reusable pressure scenarios are defined in `tests/pressure-scenarios.md`, including private/public separation, one-improvement upstream contribution, and token-bounded update notices.
 
-Limitation: fresh-context agent runs with and without the skill were not available in this environment. These remain the first post-install behavioral verification gate.
+Limitation: fresh-context agent runs with and without the installed skill were not available in this environment. They remain the behavioral verification gate before marking the draft ready for review.
