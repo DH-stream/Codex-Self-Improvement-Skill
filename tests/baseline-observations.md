@@ -78,3 +78,51 @@ Desired behavior:
 - store pending upstream contributions in local `UPSTREAM_QUEUE.md`;
 - preserve that queue across reinstall and universal refresh;
 - retry it when upstream access becomes available.
+
+## Baseline F — no-change gate discarded durable feedback
+
+Review of the automatic trigger showed that it checked technical file changes first and stopped immediately when none existed.
+
+Observed failure:
+
+- an explicit durable UX preference could be lost when the response changed no code;
+- a review-only blocker prompt could not create correction evidence until implementation happened;
+- the skill description promised feedback learning that the trigger could bypass.
+
+Desired behavior:
+
+- evaluate explicit preference and correction signals independently of file changes;
+- keep technical efficiency reflection gated by actual technical changes;
+- preserve the no-noise behavior for ordinary conversation.
+
+## Baseline G — two writable universal sources
+
+The first split-storage contract allowed a universal improvement to be written under installed `UNIVERSAL_LOCATION` and also proposed through a separate upstream branch.
+
+Observed failure:
+
+- the installed snapshot and GitHub branch could diverge;
+- reinstall could overwrite a cache-only improvement before merge;
+- a local cache write could be mistaken for a successful upstream update.
+
+Desired behavior:
+
+- treat the public repository branch as the only writable universal source;
+- treat installed universal state as a read-only snapshot of upstream `main`;
+- queue a sanitized proposal locally when upstream contribution is blocked.
+
+## Baseline H — retry identity was underspecified
+
+The retry contract said to update an existing draft when possible, but queue records had no stable identity, branch, or retry metadata.
+
+Observed failure:
+
+- timestamp-only branch names could create duplicates after partial failure;
+- a pushed branch with failed PR creation could be recreated instead of reused;
+- “retry later” had no bounded automatic trigger.
+
+Desired behavior:
+
+- assign a stable contribution ID and deterministic branch name;
+- record status, base SHA, branch, attempts, and last retry;
+- retry once per session or natural consolidation point and reuse existing remote state.
