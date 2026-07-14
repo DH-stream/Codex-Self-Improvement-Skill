@@ -14,10 +14,11 @@ cleanup() {
 trap cleanup EXIT
 
 new_temp() {
+  local variable_name="$1"
   local path
   path="$(mktemp -d)"
   TMP_DIRS+=("$path")
-  printf '%s\n' "$path"
+  printf -v "$variable_name" '%s' "$path"
 }
 
 make_fixture() {
@@ -42,8 +43,8 @@ fail() {
 test_missing_source_preserves_existing_install() {
   local name="missing source preserves existing install"
   local fixture home
-  fixture="$(new_temp)"
-  home="$(new_temp)"
+  new_temp fixture
+  new_temp home
   make_fixture "$fixture"
   rm -rf "$fixture/skills/codex-self-improvement"
   mkdir -p "$home/skills/codex-self-improvement"
@@ -64,9 +65,9 @@ test_missing_source_preserves_existing_install() {
 test_python_is_not_required() {
   local name="shell installer has no Python runtime dependency"
   local fixture home fakebin
-  fixture="$(new_temp)"
-  home="$(new_temp)"
-  fakebin="$(new_temp)"
+  new_temp fixture
+  new_temp home
+  new_temp fakebin
   make_fixture "$fixture"
   cat > "$fakebin/python3" <<'SH'
 #!/usr/bin/env sh
@@ -84,8 +85,8 @@ SH
 test_universal_refresh_removes_stale_directories() {
   local name="universal refresh removes stale directories"
   local fixture home
-  fixture="$(new_temp)"
-  home="$(new_temp)"
+  new_temp fixture
+  new_temp home
   make_fixture "$fixture"
   mkdir -p "$home/self-improvement/universal/stale/subdir"
   printf 'stale\n' > "$home/self-improvement/universal/stale/subdir/file.txt"
@@ -102,9 +103,65 @@ test_universal_refresh_removes_stale_directories() {
   fi
 }
 
+test_reinstall_preserves_private_and_refreshes_universal() {
+  local name="reinstall preserves private state and refreshes universal snapshot"
+  local fixture home queue_file universal_file marker_count
+  new_temp fixture
+  new_temp home
+  make_fixture "$fixture"
+
+  if ! CODEX_HOME="$home" bash "$fixture/install.sh" >/dev/null 2>&1; then
+    fail "$name" "first install failed"
+    return
+  fi
+
+  queue_file="$home/self-improvement/private/UPSTREAM_QUEUE.md"
+  universal_file="$home/self-improvement/universal/ACTIVE_PATTERNS.md"
+  printf '\nstatus: pending\ncontribution_id: universal-test-1234\n' >> "$queue_file"
+  printf '\nsource-refresh-marker\n' >> "$fixture/memory/ACTIVE_PATTERNS.md"
+
+  if ! CODEX_HOME="$home" bash "$fixture/install.sh" >/dev/null 2>&1; then
+    fail "$name" "second install failed"
+    return
+  fi
+
+  marker_count="$(grep -Fc '<!-- codex-self-improvement:start -->' "$home/AGENTS.md" || true)"
+  if grep -Fq 'contribution_id: universal-test-1234' "$queue_file" &&
+     grep -Fq 'source-refresh-marker' "$universal_file" &&
+     [[ "$marker_count" == "1" ]]; then
+    pass "$name"
+  else
+    fail "$name" "private queue, universal refresh, or activation idempotency failed"
+  fi
+}
+
+test_unmatched_agents_markers_preserve_install() {
+  local name="unmatched AGENTS markers fail before activation"
+  local fixture home
+  new_temp fixture
+  new_temp home
+  make_fixture "$fixture"
+  mkdir -p "$home/skills/codex-self-improvement"
+  printf 'keep-me\n' > "$home/skills/codex-self-improvement/sentinel.txt"
+  printf '<!-- codex-self-improvement:start -->\nbroken\n' > "$home/AGENTS.md"
+
+  if CODEX_HOME="$home" bash "$fixture/install.sh" >/dev/null 2>&1; then
+    fail "$name" "installer unexpectedly accepted malformed markers"
+    return
+  fi
+
+  if [[ -f "$home/skills/codex-self-improvement/sentinel.txt" ]]; then
+    pass "$name"
+  else
+    fail "$name" "active install changed before marker validation completed"
+  fi
+}
+
 test_missing_source_preserves_existing_install
 test_python_is_not_required
 test_universal_refresh_removes_stale_directories
+test_reinstall_preserves_private_and_refreshes_universal
+test_unmatched_agents_markers_preserve_install
 
 printf '\nInstaller tests: %d passed, %d failed\n' "$PASSED" "$FAILED"
 [[ "$FAILED" -eq 0 ]]
