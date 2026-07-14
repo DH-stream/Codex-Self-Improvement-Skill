@@ -1,10 +1,18 @@
-# Post-change reflection contract
+# Post-prompt reflection contract
 
-## Trigger
+## Independent entry signals
 
-`technical_files_changed = true`
+Evaluate these signals separately:
 
-Technical files include code, tests, configuration, scripts, migrations, CI, agent instructions, and skills. Ordinary prose documentation is excluded unless it changes technical workflow.
+```text
+explicit_durable_feedback
+current_prompt_reviews_or_corrects_prior_work
+technical_files_changed
+```
+
+A prompt may trigger more than one signal. No technical file change disables only the technical efficiency retrospective; it must not discard explicit taste or correction evidence.
+
+Technical files include code, tests, configuration, scripts, migrations, CI, agent instructions, and skills. Ordinary prose documentation counts only when it changes technical workflow.
 
 ## Inputs
 
@@ -14,17 +22,27 @@ head_after
 changed_files_before
 changed_files_after
 verification_evidence
+explicit_feedback_evidence
+correction_or_review_evidence
 ```
 
-No extra command is required solely to create reflection evidence.
+Do not run extra commands solely to manufacture reflection evidence.
 
-## Fixed questions
+## Feedback path
+
+When `explicit_durable_feedback = true`, evaluate it through `taste-learning.md` or the applicable private workflow-preference schema. A durable explicit statement may update private memory even when no repository file changed.
+
+When `current_prompt_reviews_or_corrects_prior_work = true`, run `correction-retrospective.md` even when implementation is deferred. The result still passes the normal write and privacy gates.
+
+## Technical-change path
+
+Run these questions only when `technical_files_changed = true`:
 
 1. What materially changed?
 2. Which action produced real evidence?
 3. Which repeated action produced no new information?
 4. Which smaller or earlier check could preserve the same quality?
-5. Which memory class fits: universal pattern, user taste/private evidence, recurring mistake, engine gap, project fact, or no lesson?
+5. Which memory class fits: universal pattern, private evidence, recurring mistake, engine gap, project fact, or no lesson?
 
 ## Classification
 
@@ -34,37 +52,27 @@ No extra command is required solely to create reflection evidence.
 | One-off event | No write |
 | Private observation | Write only under `PRIVATE_LOCATION` when durable |
 | User taste | Apply the private taste-learning contract |
-| Universal candidate/pattern | Write public-safe data under `UNIVERSAL_LOCATION` and apply upstream contribution |
-| Recurring universal mistake | Add public-safe evidence and a preventive check |
-| Engine gap | Create a public-safe engine upgrade with a pressure scenario |
+| Universal candidate/pattern | Author public-safe changes in an isolated upstream branch |
+| Recurring universal mistake | Add public-safe evidence/check in the upstream branch |
+| Engine gap | Add a pressure scenario and engine change in the upstream branch |
+| Blocked universal contribution | Write a sanitized record to private `UPSTREAM_QUEUE.md` |
+
+`UNIVERSAL_LOCATION` is a read-only installed snapshot. Do not write proposals there.
 
 ## Write gate
 
-A memory update requires all of these properties:
+Any write must be concrete, reusable, correctly scoped, evidence-backed, behavior-changing, and quality-preserving.
 
-- concrete;
-- reusable;
-- correctly scoped;
-- evidence-backed;
-- behavior-changing;
-- quality-preserving.
-
-A universal write additionally requires:
-
-- applicability across repositories or technologies;
-- safe anonymization without losing the action;
-- no personal, proprietary, secret, or project-specific dependency.
+A universal contribution additionally requires cross-repository applicability, safe anonymization without losing the action, and no personal, proprietary, secret, or project-specific dependency.
 
 Otherwise the result is `no_write` or private-only storage.
 
-## Upstream threshold
+## Upstream threshold and queue retry
 
-One qualified universal improvement is enough to propose upstream. Do not wait for batching. Store it as provisional when confidence is not yet confirmed, then follow `upstream-contribution.md`.
+One qualified universal improvement is enough; confirmation controls confidence, not eligibility for a draft PR. Follow `upstream-contribution.md`.
+
+At session start or a natural consolidation point, inspect `UPSTREAM_QUEUE.md`. Retry pending entries at most once per session unless the user explicitly requests another attempt. Reuse their stable contribution ID and branch.
 
 ## Visibility
 
-Routine reasoning remains silent.
-
-When no memory or skill file changed, emit no self-improvement notice.
-
-When files changed, use one compact notice from `memory-schema.md` naming only the changed file(s) and any upstream draft PR. Do not explain the lesson unless asked.
+Routine reasoning remains silent. No write means no notice. Actual memory/skill writes use one compact line from `memory-schema.md`, naming changed files and any confirmed draft PR without explaining the lesson.
