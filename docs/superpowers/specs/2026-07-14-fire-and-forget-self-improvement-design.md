@@ -2,36 +2,35 @@
 
 ## Goal
 
-Build one global Codex skill that learns safer and more efficient engineering behavior and the user's durable visual/UX taste across repositories without requiring manual activation after each prompt.
+Build one global Codex skill that learns safer and more efficient engineering behavior and the user's durable visual/UX taste across repositories without requiring manual activation.
 
 The public GitHub repository evolves from universal improvements. Personal learning remains private and local.
 
 ## Learning lanes
 
-The system has two lanes owned by one engine:
+The engine owns two separate lanes:
 
 1. **Universal work-pattern learning**
    - planning, exploration, implementation, testing, review, and reporting;
    - token/time waste detection;
-   - recurring mistakes;
-   - correction retrospectives when later prompts reveal blockers in prior work;
+   - recurring mistakes and correction retrospectives;
    - engine, schema, and installation improvements.
 
-2. **Private taste learning**
+2. **Private taste and preference learning**
    - UX, design, color, copy, interaction, visual density, animation, and image-editing preferences;
    - explicit corrections outweigh inference;
-   - scope is recorded so one product preference does not control unrelated contexts;
-   - records remain local and are never used as public PR evidence.
+   - scope prevents a preference from leaking into unrelated contexts;
+   - records remain local and never support a public PR.
 
-Project-specific facts such as test commands, frameworks, filenames, or business rules are not promoted as universal memory.
+Project facts such as commands, frameworks, filenames, repository names, or business rules are not universal memory.
 
 ## Storage architecture
 
 ```text
 ~/.codex/self-improvement/
-├── PRIVATE_LOCATION        -> local private state
-├── UNIVERSAL_LOCATION      -> installed public-compatible state
-├── UPSTREAM_LOCATION       -> local checkout used for contributions
+├── PRIVATE_LOCATION        -> writable local private state
+├── UNIVERSAL_LOCATION      -> read-only installed snapshot of upstream main
+├── UPSTREAM_LOCATION       -> checkout used for isolated contributions
 ├── UPSTREAM_REPOSITORY     -> configured GitHub repository
 ├── private/
 │   ├── UX_TASTE.md
@@ -47,43 +46,47 @@ Project-specific facts such as test commands, frameworks, filenames, or business
     └── UPDATE_LOG.md
 ```
 
-The public repository contains universal state and neutral private templates. It contains no learned user taste. `UPSTREAM_QUEUE.md` is local operational state containing only already-sanitized contributions waiting for upstream access.
+The public repository is the only writable universal source. `UNIVERSAL_LOCATION` is used for lookup and deduplication only and changes through later repository sync/install. `UPSTREAM_QUEUE.md` contains only sanitized public-compatible proposals blocked before draft-PR confirmation.
 
 ## Trigger model
 
-Codex does not decide whether an abstract “task” is complete. Observable repository state drives the process.
+The engine evaluates observable signals rather than guessing whether a task is complete.
 
-Before technical work, capture a lightweight state snapshot. After responding:
+After every user prompt, evaluate in this order:
 
-- no meaningful technical file change → no reflection;
-- technical repository files changed → bounded micro-retrospective;
-- current work fixes, reviews, or supersedes earlier implementation → correction retrospective too;
-- commit, completed plan, final verification, strong user correction, or session handoff → consolidation.
+1. **Explicit durable feedback**
+   - evaluate private taste/workflow memory even when no repository file changed.
+2. **Review, blocker, or correction of earlier work**
+   - run the correction retrospective even when implementation is deferred.
+3. **Technical repository change**
+   - run the bounded efficiency retrospective only when code, tests, config, scripts, migrations, CI, agent instructions, or skills changed.
+4. **Consolidation point**
+   - commit, completed plan, final verification, strong correction, or session handoff may consolidate evidence and retry queued upstream work.
 
-Technical files include code, tests, configuration, scripts, migrations, CI, `AGENTS.md`, and skill/workflow instructions. Ordinary prose documentation does not trigger reflection unless it changes agent behavior or technical workflow.
+Ordinary conversation with no durable feedback, correction, or technical change produces no reflection write or notice.
 
 ## Fire-and-forget behavior
 
 - Never ask whether reflection should run.
 - Never interrupt implementation solely to reflect.
 - Reflection with no file write remains silent.
-- Write no memory update when evidence is weak or project-specific.
-- Read only relevant active categories at task start.
-- After a real memory/skill write, emit one compact line naming the changed files and any draft PR.
+- Weak, one-off, or project-specific evidence creates no global write.
+- Read only relevant active categories.
+- After a real memory/skill write, emit one compact line naming changed files and any confirmed draft PR.
 - Do not explain the lesson unless requested.
 
 ## Correction retrospective
 
-When prompt 2 supplies blockers/fixes for prompt 1, Codex asks:
+When later feedback reveals blockers or flaws in earlier work, Codex asks:
 
 1. What was missed?
 2. Why was it missed?
-3. Was the necessary evidence available during prompt 1?
+3. Was the necessary evidence available during the original implementation?
 4. What minimum check would have exposed it without hindsight?
 5. Did a test encode the implementation instead of the requirement?
-6. Is the lesson universal, private user taste, or merely project context?
+6. Is the result universal, private user taste, or project context?
 
-The output must produce a preventive check, not “be more careful.”
+The result must be a preventive action, not “be more careful.”
 
 ## Memory lifecycle
 
@@ -92,67 +95,71 @@ candidate → provisional → confirmed → low-relevance
                                   ↘ superseded
 ```
 
-Nothing is deleted. Original evidence is immutable. New evidence appends:
+Nothing learned is deleted. Original evidence is immutable and later evidence appends:
 
-- supporting evidence increases confidence;
-- independent evidence from another task or repository promotes a pattern;
-- one severe or clear universal incident may create a provisional pattern;
-- contradicting evidence lowers confidence/relevance;
-- replacement rules mark older ones superseded.
+- supporting independent evidence raises confidence;
+- one strong universal incident may create a provisional proposal;
+- contradiction lowers confidence/relevance;
+- a better rule marks the older one superseded.
 
-One qualified universal improvement is enough to propose a draft PR. Independent confirmation controls promotion and confidence, not whether a reviewable proposal may exist.
-
-Active indexes stay compact; full history remains available for consolidation.
+One qualified universal improvement is enough for a draft PR. Independent confirmation controls promotion and confidence, not proposal eligibility.
 
 ## Taste evidence hierarchy
 
 1. Explicit correction or durable preference.
-2. User accepts/repeats the same choice independently.
+2. Independent repeated acceptance or choice.
 3. Repeated implicit selection.
 4. Agent inference.
 
-The latest explicit instruction wins within its stated scope. Conflicts do not erase private history. “Universal-to-user” scope never means public or universal across users.
+The latest explicit instruction wins within its scope. “Universal-to-user” never means public or universal across users.
 
 ## Universal upstream evolution
 
-A qualified universal improvement follows this flow:
+A universal proposal follows this flow:
 
 ```text
 local evidence
 → privacy-safe universal classification
+→ stable contribution ID + deterministic branch
+→ inspect queue, remote branch, and open draft PR for duplicates
+→ fetch current remote main
+→ isolated worktree
 → RED/pressure scenario
-→ isolated branch from current upstream main
-→ minimal engine/pattern change
-→ fresh verification and complete diff privacy review
-→ push dedicated branch
+→ smallest complete public-safe change
+→ fresh verification + full diff privacy review
+→ push branch
 → open/update draft PR
 → stop for human review
 ```
 
 Rules:
 
-- one improvement is sufficient; batching is not required;
-- each improvement uses a dedicated branch unless an open draft already represents the same change;
-- direct writes to `main` are forbidden;
-- automatic merge, approval, and ready-for-review transitions are forbidden;
-- draft PRs disclose verification limitations;
-- private memory is outside the public contribution surface.
+- one improvement is sufficient;
+- `contribution_id` derives from normalized action plus a short content hash;
+- branch name is `codex/self-improvement/<contribution_id>`;
+- reuse matching queue, remote branch, or draft PR state;
+- base new work on current remote `main`, not stale local `main`;
+- refuse work when the isolated base is unproven or unrelated changes appear;
+- never push directly to `main`, merge, approve, or mark ready automatically;
+- disclose verification limitations in the draft PR;
+- keep private memory outside the contribution surface.
 
-When authentication or network access blocks the contribution:
+## Queue lifecycle
+
+When authentication, network, or PR creation blocks delivery:
 
 ```text
-sanitized contribution
-→ local UPSTREAM_QUEUE.md
-→ preserved across reinstall/universal refresh
-→ retry on later authenticated run
-→ remove queue entry only after branch + draft PR confirmation
+sanitized proposal
+→ stable UPSTREAM_QUEUE.md record
+→ status pending or branch-pushed
+→ retry at most once per session or natural consolidation point
+→ reuse deterministic branch / existing draft PR
+→ status pr-open + recorded PR URL after confirmation
 ```
 
-The queue never contains ordinary private observations or learned taste.
+Successful records remain as operational history rather than being deleted. Obsolete records become `superseded` and link their replacement. The queue never contains ordinary private observations or learned taste.
 
 ## Notification contract
-
-Actual writes produce one line:
 
 ```text
 Self-improvement updated: `UX_TASTE.md`.
@@ -160,7 +167,7 @@ Self-improvement updated: `ACTIVE_PATTERNS.md`; draft PR #12 opened.
 Self-improvement updated: `UPSTREAM_QUEUE.md`; upstream draft PR failed.
 ```
 
-The line names every changed memory/skill file. It does not restate the lesson, prompt, plan, or retrospective. No file change means no notice.
+The line names changed memory/skill files and any confirmed PR. It does not restate the lesson, prompt, plan, or retrospective. No write means no notice.
 
 ## Safety invariants
 
@@ -171,19 +178,19 @@ Efficiency may change sequencing, scope, and reporting. It may never:
 - omit security, race, accessibility, or data-integrity checks;
 - review only a description when code/base comparison is required;
 - hide blockers or overstate completion;
-- modify the user's established visual direction while fixing unrelated behavior;
-- expose private memory or proprietary context publicly.
+- alter established visual direction while fixing unrelated behavior;
+- expose private memory, local paths, proprietary context, or credentials publicly.
 
 ## Installation architecture
 
-The installable skill lives under `skills/codex-self-improvement/`.
+Each installer:
 
-Each install:
+1. validates source directories, templates, activation snippet, destination safety, and upstream checkout;
+2. stages complete skill, universal-snapshot, and `AGENTS.md` replacements;
+3. rejects malformed activation markers before active files change;
+4. preserves and seeds private files without overwriting learned state;
+5. activates complete replacements, removing stale universal files/directories;
+6. records private, universal, checkout, and repository locations;
+7. keeps exactly one activation block.
 
-- refreshes engine files;
-- refreshes public universal state from the checkout;
-- seeds missing private files from neutral templates;
-- preserves existing private files, including `UPSTREAM_QUEUE.md`;
-- migrates taste files from the first installer layout;
-- records private, universal, checkout, and repository locations;
-- updates one marked global `AGENTS.md` activation block.
+The shell path uses Bash/awk and has no Python dependency. Executable regression tests cover source failure, portability, stale-directory cleanup, private preservation, universal refresh, and malformed markers. PowerShell follows the same staged/preflight contract and remains subject to a real Windows runtime gate.
