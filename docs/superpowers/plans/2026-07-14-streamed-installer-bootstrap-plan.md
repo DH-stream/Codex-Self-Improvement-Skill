@@ -2,41 +2,38 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make the advertised `curl | bash` and `irm | iex` commands safely install from a persistent Git checkout while preserving current local-install behavior.
+**Goal:** Make `curl | bash` and `irm | iex` safely install from a persistent Git checkout while preserving local installation.
 
-**Architecture:** Both installers first detect whether they are running beside a complete repository checkout. Local execution continues unchanged. Streamed execution resolves a supplied `UPSTREAM_LOCATION` or creates/reuses `~/.codex/self-improvement/upstream-checkout`, validates it, and invokes the bundled installer from that checkout. Fresh clones stage into a temporary sibling directory before activation; existing managed checkouts update with `git pull --ff-only`.
+**Architecture:** Each installer detects whether it runs beside a complete repository. Local execution continues unchanged. Streamed execution uses a supplied checkout or creates/reuses `<CodexHome>/self-improvement/upstream-checkout`, validates it, then invokes the bundled local installer. Fresh clones stage in a temporary sibling path; existing managed checkouts update with fast-forward-only Git operations.
 
-**Tech Stack:** Bash, PowerShell, Git, existing filesystem-based installer tests.
+**Tech Stack:** Bash, PowerShell, Git, filesystem regression tests.
 
 ## Global Constraints
 
-- Existing local clone installation must remain compatible.
-- A bootstrap failure must not modify the active skill, universal snapshot, private memory, or global `AGENTS.md`.
-- Fresh streamed installs require Git.
-- Existing managed checkouts update only through fast-forward pulls.
-- `UPSTREAM_LOCATION` and `UPSTREAM_REPOSITORY` remain supported.
-- No direct push, merge, approval, or ready-for-review behavior is introduced.
+- Bootstrap failure must not modify the active skill, universal snapshot, private memory, or `AGENTS.md`.
+- Existing clone-based installation and environment aliases remain compatible.
+- Fresh streamed installation requires Git unless a valid checkout is supplied.
+- Managed checkout updates are fast-forward-only.
+- No automatic merge, approval, or direct push behavior is introduced.
 
 ---
 
 ## File map
 
-- `install.sh` — local installer plus streamed Bash bootstrap entrypoint.
-- `install.ps1` — local installer plus streamed PowerShell bootstrap entrypoint.
-- `tests/test-install.sh` — existing local tests plus isolated streamed Bash tests using a local bare Git remote.
-- `tests/test-install.ps1` — equivalent PowerShell regression runner; skips with a clear message when no PowerShell runtime exists.
+- `install.sh` — Bash bootstrap plus existing local installer.
+- `install.ps1` — PowerShell bootstrap plus existing local installer.
+- `tests/test-install.sh` — existing tests plus streamed Bash coverage.
+- `tests/test-install.ps1` — streamed PowerShell coverage.
 
-### Task 1: Add failing Bash streamed-install tests
+### Task 1: Add RED Bash streamed-install tests
 
 **Files:**
 - Modify: `tests/test-install.sh`
 
 **Interfaces:**
-- Produces: local Git fixture helpers and two tests that drive `install.sh` through stdin.
+- Produces: a local bare Git fixture and streamed success/failure tests.
 
-- [ ] **Step 1: Add Git fixture helpers**
-
-Add helpers that create a committed source repository and bare remote:
+- [ ] **Step 1: Add fixture helpers after `make_fixture`**
 
 ```bash
 make_git_remote() {
@@ -53,14 +50,12 @@ run_streamed_installer() {
   local script="$1" home="$2" remote="$3"
   (
     cd "$(dirname "$home")"
-    CODEX_HOME="$home" \
-    UPSTREAM_REPOSITORY="$remote" \
-    bash < "$script"
+    CODEX_HOME="$home" UPSTREAM_REPOSITORY="$remote" bash < "$script"
   )
 }
 ```
 
-- [ ] **Step 2: Add a streamed-success test**
+- [ ] **Step 2: Add both tests before the invocation block**
 
 ```bash
 test_streamed_bootstrap_installs_from_persistent_checkout() {
@@ -87,11 +82,7 @@ test_streamed_bootstrap_installs_from_persistent_checkout() {
     fail "$name" "skill or persistent checkout missing"
   fi
 }
-```
 
-- [ ] **Step 3: Add a streamed-failure preservation test**
-
-```bash
 test_streamed_bootstrap_failure_preserves_existing_install() {
   local name="streamed bootstrap failure preserves existing install"
   local fixture home
@@ -101,7 +92,7 @@ test_streamed_bootstrap_failure_preserves_existing_install() {
   mkdir -p "$home/skills/codex-self-improvement"
   printf 'keep-me\n' > "$home/skills/codex-self-improvement/sentinel.txt"
 
-  if run_streamed_installer "$fixture/install.sh" "$home" "$home/missing-remote.git" >/dev/null 2>&1; then
+  if run_streamed_installer "$fixture/install.sh" "$home" "$home/missing.git" >/dev/null 2>&1; then
     fail "$name" "invalid remote unexpectedly succeeded"
     return
   fi
@@ -114,19 +105,22 @@ test_streamed_bootstrap_failure_preserves_existing_install() {
 }
 ```
 
-- [ ] **Step 4: Register and run the tests**
+- [ ] **Step 3: Invoke the tests after the existing five**
 
-Append both functions before the final summary and invoke them after the existing tests.
+```bash
+test_streamed_bootstrap_installs_from_persistent_checkout
+test_streamed_bootstrap_failure_preserves_existing_install
+```
 
-Run:
+- [ ] **Step 4: Run RED**
 
 ```bash
 bash tests/test-install.sh
 ```
 
-Expected: the two new tests fail while the original five still pass.
+Expected: original five pass; both streamed tests fail.
 
-- [ ] **Step 5: Commit the RED tests**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add tests/test-install.sh
@@ -137,14 +131,13 @@ git commit -m "test: cover streamed bash installation"
 
 **Files:**
 - Modify: `install.sh`
+- Test: `tests/test-install.sh`
 
 **Interfaces:**
-- Consumes: `CODEX_HOME`, `UPSTREAM_LOCATION`, `UPSTREAM_REPOSITORY`.
-- Produces: a validated persistent checkout at `$CODEX_HOME/self-improvement/upstream-checkout` for streamed execution.
+- Consumes: `CODEX_HOME`, `UPSTREAM_LOCATION`, `UPSTREAM_REPOSITORY`, and legacy aliases.
+- Produces: a validated persistent checkout used by the existing installer.
 
-- [ ] **Step 1: Add layout detection before local source validation**
-
-Directly after `fail()` add:
+- [ ] **Step 1: Add these helpers after `fail()`**
 
 ```bash
 has_repo_layout() {
@@ -162,46 +155,49 @@ resolve_script_root() {
 }
 ```
 
-- [ ] **Step 2: Add the streamed bootstrap function**
+- [ ] **Step 2: Add the complete bootstrap function below the helpers**
 
 ```bash
 bootstrap_streamed_install() {
-  command -v git >/dev/null 2>&1 || fail "git is required for streamed installation"
-
-  local state_root="$CODEX_HOME/self-improvement"
-  local repository="${UPSTREAM_REPOSITORY:-${SELF_IMPROVEMENT_UPSTREAM_REPOSITORY:-https://github.com/DH-stream/Codex-Self-Improvement-Skill.git}}"
-  local checkout="${UPSTREAM_LOCATION:-${SELF_IMPROVEMENT_UPSTREAM_CHECKOUT:-$state_root/upstream-checkout}}"
-  local temp_checkout="${checkout}.install.$$"
+  local repository checkout explicit_checkout temp_checkout=""
+  repository="${UPSTREAM_REPOSITORY:-${SELF_IMPROVEMENT_UPSTREAM_REPOSITORY:-https://github.com/DH-stream/Codex-Self-Improvement-Skill.git}}"
+  explicit_checkout="${UPSTREAM_LOCATION:-${SELF_IMPROVEMENT_UPSTREAM_CHECKOUT:-}}"
+  checkout="${explicit_checkout:-$CODEX_HOME/self-improvement/upstream-checkout}"
 
   [[ -n "$repository" ]] || fail "upstream repository is empty"
-  mkdir -p "$state_root"
 
-  if [[ -n "${UPSTREAM_LOCATION:-${SELF_IMPROVEMENT_UPSTREAM_CHECKOUT:-}}" ]]; then
+  if [[ -n "$explicit_checkout" ]]; then
     has_repo_layout "$checkout" || fail "supplied upstream checkout is incomplete: $checkout"
-  elif [[ -d "$checkout/.git" ]]; then
-    git -C "$checkout" fetch origin main || fail "could not fetch upstream main"
-    git -C "$checkout" checkout main >/dev/null 2>&1 || fail "could not checkout upstream main"
-    git -C "$checkout" pull --ff-only origin main || fail "upstream checkout is not fast-forwardable"
-    has_repo_layout "$checkout" || fail "updated upstream checkout is incomplete: $checkout"
-  elif [[ -e "$checkout" ]]; then
-    fail "managed upstream checkout exists but is not a Git repository: $checkout"
   else
-    rm -rf "$temp_checkout"
-    trap 'rm -rf "$temp_checkout"' RETURN
-    git clone --quiet --branch main --single-branch "$repository" "$temp_checkout" || fail "could not clone upstream repository"
-    has_repo_layout "$temp_checkout" || fail "cloned upstream checkout is incomplete"
-    mv "$temp_checkout" "$checkout" || fail "could not activate upstream checkout"
-    trap - RETURN
+    command -v git >/dev/null 2>&1 || fail "git is required for streamed installation"
+    mkdir -p "$(dirname "$checkout")"
+
+    if [[ -d "$checkout/.git" ]]; then
+      git -C "$checkout" fetch origin main || fail "could not fetch upstream main"
+      git -C "$checkout" checkout main >/dev/null 2>&1 || fail "could not checkout upstream main"
+      git -C "$checkout" pull --ff-only origin main || fail "upstream checkout is not fast-forwardable"
+      has_repo_layout "$checkout" || fail "updated upstream checkout is incomplete: $checkout"
+    elif [[ -e "$checkout" ]]; then
+      fail "managed upstream checkout exists but is not a Git repository: $checkout"
+    else
+      temp_checkout="${checkout}.install.$$"
+      cleanup_bootstrap() {
+        [[ -z "$temp_checkout" ]] || rm -rf "$temp_checkout"
+      }
+      trap cleanup_bootstrap EXIT
+      rm -rf "$temp_checkout"
+      git clone --quiet --branch main --single-branch "$repository" "$temp_checkout" || fail "could not clone upstream repository"
+      has_repo_layout "$temp_checkout" || fail "cloned upstream checkout is incomplete"
+      mv "$temp_checkout" "$checkout" || fail "could not activate upstream checkout"
+      temp_checkout=""
+    fi
   fi
 
-  UPSTREAM_LOCATION="$checkout" UPSTREAM_REPOSITORY="$repository" bash "$checkout/install.sh"
-  exit $?
+  exec env UPSTREAM_LOCATION="$checkout" UPSTREAM_REPOSITORY="$repository" bash "$checkout/install.sh"
 }
 ```
 
-- [ ] **Step 3: Route streamed execution into the bootstrap**
-
-Replace the current `REPO_ROOT=...` assignment with:
+- [ ] **Step 3: Replace the current early initialization with this gate**
 
 ```bash
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
@@ -213,67 +209,137 @@ if [[ -z "$REPO_ROOT" ]] || ! has_repo_layout "$REPO_ROOT"; then
 fi
 ```
 
-Remove the duplicate existing `CODEX_HOME` initialization below it. Keep the remainder of the local installer unchanged.
+Delete the duplicate existing `CODEX_HOME` and `REPO_ROOT` assignments. Keep the local installer body from `SKILL_SOURCE=...` onward unchanged.
 
-- [ ] **Step 4: Run syntax and regressions**
+- [ ] **Step 4: Run GREEN**
 
 ```bash
 bash -n install.sh
 bash tests/test-install.sh
 ```
 
-Expected: syntax passes and all seven tests pass.
+Expected: syntax succeeds; seven tests pass.
 
-- [ ] **Step 5: Commit the Bash implementation**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add install.sh tests/test-install.sh
 git commit -m "feat: support streamed bash installation"
 ```
 
-### Task 3: Add PowerShell bootstrap coverage
+### Task 3: Add RED PowerShell streamed-install tests
 
 **Files:**
 - Create: `tests/test-install.ps1`
 
 **Interfaces:**
-- Produces: a standalone PowerShell regression runner using a local bare Git remote.
+- Produces: two isolated tests using a local bare Git remote and raw-text installer execution.
 
-- [ ] **Step 1: Create the test runner**
-
-Create a script that:
-
-1. copies `install.ps1`, `install/`, `memory/`, and `skills/` into a temporary fixture;
-2. initializes and commits that fixture, then creates a bare Git remote;
-3. launches a child PowerShell process that evaluates `install.ps1` from raw text with `CODEX_HOME` and `UPSTREAM_REPOSITORY` set;
-4. asserts `SKILL.md` and the persistent `.git` directory exist;
-5. repeats with a missing remote and asserts a pre-existing sentinel remains;
-6. removes all temporary directories in `finally`.
-
-Use this exact child invocation shape so `$PSScriptRoot` is empty:
+- [ ] **Step 1: Create `tests/test-install.ps1` with this content**
 
 ```powershell
-$command = @'
 $ErrorActionPreference = "Stop"
-$env:CODEX_HOME = $args[0]
-$env:UPSTREAM_REPOSITORY = $args[1]
-$source = Get-Content -Raw -LiteralPath $args[2]
+$root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$tempRoot = Join-Path ([IO.Path]::GetTempPath()) ("codex-install-tests-" + [guid]::NewGuid().ToString("N"))
+$shell = (Get-Process -Id $PID).Path
+$passed = 0
+$failed = 0
+
+function Assert-Native([string]$Message) {
+  if ($LASTEXITCODE -ne 0) { throw $Message }
+}
+
+function New-Fixture([string]$Path) {
+  New-Item -ItemType Directory -Force -Path $Path | Out-Null
+  Copy-Item (Join-Path $root "install.ps1") $Path
+  Copy-Item (Join-Path $root "install") $Path -Recurse
+  Copy-Item (Join-Path $root "memory") $Path -Recurse
+  Copy-Item (Join-Path $root "skills") $Path -Recurse
+}
+
+function New-BareRemote([string]$Fixture, [string]$Bare) {
+  & git -C $Fixture init -q
+  Assert-Native "git init failed"
+  & git -C $Fixture config user.email test@example.com
+  & git -C $Fixture config user.name "Installer Test"
+  & git -C $Fixture add .
+  & git -C $Fixture commit -qm "test fixture"
+  Assert-Native "git commit failed"
+  & git clone -q --bare $Fixture $Bare
+  Assert-Native "bare clone failed"
+}
+
+function Invoke-Streamed([string]$Home, [string]$Remote, [string]$Installer) {
+  $runner = Join-Path $tempRoot ("runner-" + [guid]::NewGuid().ToString("N") + ".ps1")
+  @'
+param([string]$HomePath, [string]$RemotePath, [string]$InstallerPath)
+$ErrorActionPreference = "Stop"
+$env:CODEX_HOME = $HomePath
+$env:UPSTREAM_REPOSITORY = $RemotePath
+$source = Get-Content -Raw -LiteralPath $InstallerPath
 Invoke-Expression $source
-'@
-& $PSHOME/pwsh -NoProfile -Command $command $home $bare $scriptPath
+'@ | Set-Content -LiteralPath $runner -Encoding UTF8
+  & $shell -NoProfile -File $runner $Home $Remote $Installer
+  return $LASTEXITCODE
+}
+
+function Pass([string]$Name) {
+  $script:passed++
+  Write-Host "PASS: $Name"
+}
+
+function Fail([string]$Name, [string]$Reason) {
+  $script:failed++
+  Write-Error "FAIL: $Name — $Reason" -ErrorAction Continue
+}
+
+try {
+  New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+
+  $fixture = Join-Path $tempRoot "success-fixture"
+  $bare = Join-Path $tempRoot "success.git"
+  $home = Join-Path $tempRoot "success-home"
+  New-Fixture $fixture
+  New-BareRemote $fixture $bare
+  $code = Invoke-Streamed $home $bare (Join-Path $fixture "install.ps1")
+  $checkout = Join-Path $home "self-improvement\upstream-checkout"
+  if ($code -eq 0 -and
+      (Test-Path (Join-Path $home "skills\codex-self-improvement\SKILL.md")) -and
+      (Test-Path (Join-Path $checkout ".git"))) {
+    Pass "streamed bootstrap installs from persistent checkout"
+  } else {
+    Fail "streamed bootstrap installs from persistent checkout" "installation or checkout missing"
+  }
+
+  $failureFixture = Join-Path $tempRoot "failure-fixture"
+  $failureHome = Join-Path $tempRoot "failure-home"
+  New-Fixture $failureFixture
+  $sentinel = Join-Path $failureHome "skills\codex-self-improvement\sentinel.txt"
+  New-Item -ItemType Directory -Force -Path (Split-Path $sentinel -Parent) | Out-Null
+  Set-Content -LiteralPath $sentinel -Value "keep-me"
+  $code = Invoke-Streamed $failureHome (Join-Path $tempRoot "missing.git") (Join-Path $failureFixture "install.ps1")
+  if ($code -ne 0 -and (Test-Path $sentinel)) {
+    Pass "streamed bootstrap failure preserves existing install"
+  } else {
+    Fail "streamed bootstrap failure preserves existing install" "invalid remote succeeded or sentinel disappeared"
+  }
+
+  Write-Host "`nInstaller tests: $passed passed, $failed failed"
+  if ($failed -ne 0) { exit 1 }
+} finally {
+  Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $tempRoot
+}
 ```
 
-For Windows PowerShell, resolve the current executable with `(Get-Process -Id $PID).Path` instead of assuming `pwsh`.
-
-- [ ] **Step 2: Run the test before implementation**
+- [ ] **Step 2: Run RED**
 
 ```powershell
 ./tests/test-install.ps1
 ```
 
-Expected: streamed success fails; failure-preservation may already pass.
+Expected: streamed success fails before bootstrap implementation.
 
-- [ ] **Step 3: Commit the RED test**
+- [ ] **Step 3: Commit**
 
 ```bash
 git add tests/test-install.ps1
@@ -287,12 +353,10 @@ git commit -m "test: cover streamed powershell installation"
 - Test: `tests/test-install.ps1`
 
 **Interfaces:**
-- Consumes: `$CodexHome`, `$UpstreamCheckout`, `$UpstreamRepository`, and matching environment variables.
-- Produces: the same persistent checkout contract as Bash.
+- Consumes: installer parameters and matching environment variables.
+- Produces: the same persistent-checkout contract as Bash.
 
-- [ ] **Step 1: Add repository-layout detection**
-
-After `Assert-File`, add:
+- [ ] **Step 1: Add these functions after `Assert-File`**
 
 ```powershell
 function Test-RepositoryLayout([string]$Root) {
@@ -302,48 +366,107 @@ function Test-RepositoryLayout([string]$Root) {
     (Test-Path -LiteralPath (Join-Path $Root "memory\private-template") -PathType Container) -and
     (Test-Path -LiteralPath (Join-Path $Root "install\AGENTS-snippet.md") -PathType Leaf)
 }
+
+function Invoke-Git([string[]]$Arguments, [string]$FailureMessage) {
+  & git @Arguments
+  if ($LASTEXITCODE -ne 0) { throw $FailureMessage }
+}
+
+function Invoke-StreamedBootstrap {
+  $codexFull = [IO.Path]::GetFullPath($CodexHome)
+  if ($codexFull -eq [IO.Path]::GetPathRoot($codexFull)) {
+    throw "CodexHome must be a non-root directory"
+  }
+
+  $repository = if ($PSBoundParameters.ContainsKey("UpstreamRepository")) {
+    $UpstreamRepository
+  } elseif (-not [string]::IsNullOrWhiteSpace($env:UPSTREAM_REPOSITORY)) {
+    $env:UPSTREAM_REPOSITORY
+  } elseif (-not [string]::IsNullOrWhiteSpace($env:SELF_IMPROVEMENT_UPSTREAM_REPOSITORY)) {
+    $env:SELF_IMPROVEMENT_UPSTREAM_REPOSITORY
+  } else {
+    $UpstreamRepository
+  }
+  if ([string]::IsNullOrWhiteSpace($repository)) {
+    throw "UpstreamRepository must not be empty"
+  }
+
+  $explicitCheckout = if ($PSBoundParameters.ContainsKey("UpstreamCheckout") -and -not [string]::IsNullOrWhiteSpace($UpstreamCheckout)) {
+    $UpstreamCheckout
+  } elseif (-not [string]::IsNullOrWhiteSpace($env:UPSTREAM_LOCATION)) {
+    $env:UPSTREAM_LOCATION
+  } elseif (-not [string]::IsNullOrWhiteSpace($env:SELF_IMPROVEMENT_UPSTREAM_CHECKOUT)) {
+    $env:SELF_IMPROVEMENT_UPSTREAM_CHECKOUT
+  } else {
+    ""
+  }
+
+  $checkout = if ([string]::IsNullOrWhiteSpace($explicitCheckout)) {
+    Join-Path $codexFull "self-improvement\upstream-checkout"
+  } else {
+    [IO.Path]::GetFullPath($explicitCheckout)
+  }
+  $tempCheckout = ""
+
+  try {
+    if (-not [string]::IsNullOrWhiteSpace($explicitCheckout)) {
+      if (-not (Test-RepositoryLayout $checkout)) {
+        throw "Supplied upstream checkout is incomplete: $checkout"
+      }
+    } else {
+      if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        throw "git is required for streamed installation"
+      }
+      New-Item -ItemType Directory -Force -Path (Split-Path $checkout -Parent) | Out-Null
+
+      if (Test-Path -LiteralPath (Join-Path $checkout ".git") -PathType Container) {
+        Invoke-Git @("-C", $checkout, "fetch", "origin", "main") "Could not fetch upstream main"
+        Invoke-Git @("-C", $checkout, "checkout", "main") "Could not checkout upstream main"
+        Invoke-Git @("-C", $checkout, "pull", "--ff-only", "origin", "main") "Upstream checkout is not fast-forwardable"
+        if (-not (Test-RepositoryLayout $checkout)) {
+          throw "Updated upstream checkout is incomplete: $checkout"
+        }
+      } elseif (Test-Path -LiteralPath $checkout) {
+        throw "Managed upstream checkout exists but is not a Git repository: $checkout"
+      } else {
+        $tempCheckout = "$checkout.install-$([guid]::NewGuid().ToString('N'))"
+        Invoke-Git @("clone", "--quiet", "--branch", "main", "--single-branch", $repository, $tempCheckout) "Could not clone upstream repository"
+        if (-not (Test-RepositoryLayout $tempCheckout)) {
+          throw "Cloned upstream checkout is incomplete"
+        }
+        Move-Item -LiteralPath $tempCheckout -Destination $checkout
+        $tempCheckout = ""
+      }
+    }
+
+    $installerPath = Join-Path $checkout "install.ps1"
+    & $installerPath -CodexHome $CodexHome -UpstreamCheckout $checkout -UpstreamRepository $repository
+  } finally {
+    if (-not [string]::IsNullOrWhiteSpace($tempCheckout)) {
+      Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $tempCheckout
+    }
+  }
+}
 ```
 
-- [ ] **Step 2: Add `Invoke-StreamedBootstrap`**
-
-Implement a function that:
-
-- resolves the repository from explicit parameter, environment, then the existing GitHub default;
-- resolves a supplied checkout or defaults to `<CodexHome>/self-improvement/upstream-checkout`;
-- validates a supplied checkout without changing it;
-- for an existing managed checkout, runs `git fetch origin main`, `git checkout main`, and `git pull --ff-only origin main`, checking `$LASTEXITCODE` after each call;
-- for a fresh checkout, clones into `<checkout>.install-<guid>`, validates it, and moves it into place;
-- invokes the downloaded `install.ps1` with `-CodexHome`, `-UpstreamCheckout`, and `-UpstreamRepository`;
-- always deletes an unactivated temporary checkout in `finally`.
-
-Use:
+- [ ] **Step 2: Replace the unsafe repo-root assignment with this gate**
 
 ```powershell
-& $installerPath -CodexHome $CodexHome -UpstreamCheckout $checkout -UpstreamRepository $repository
-if ($LASTEXITCODE -ne 0) { throw "Bundled installer failed with exit code $LASTEXITCODE" }
-```
-
-- [ ] **Step 3: Route raw-text execution into the bootstrap**
-
-Replace:
-
-```powershell
-$repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-```
-
-with:
-
-```powershell
-$repoRoot = if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) { $PSScriptRoot } else { "" }
+$scriptPath = $MyInvocation.MyCommand.Path
+$repoRoot = if (-not [string]::IsNullOrWhiteSpace($scriptPath)) {
+  Split-Path -Parent $scriptPath
+} else {
+  ""
+}
 if (-not (Test-RepositoryLayout $repoRoot)) {
   Invoke-StreamedBootstrap
   return
 }
 ```
 
-Keep the existing local installer body unchanged after this gate.
+Keep the existing local installer body from `$skillSource = ...` onward unchanged.
 
-- [ ] **Step 4: Run PowerShell and shell regressions**
+- [ ] **Step 3: Run GREEN**
 
 ```powershell
 ./tests/test-install.ps1
@@ -354,9 +477,9 @@ bash -n install.sh
 bash tests/test-install.sh
 ```
 
-Expected: both streamed PowerShell tests pass where a PowerShell runtime is available, and all Bash tests remain green.
+Expected: both PowerShell tests pass where PowerShell is available; all seven Bash tests pass.
 
-- [ ] **Step 5: Commit the PowerShell implementation**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add install.ps1 tests/test-install.ps1
@@ -371,20 +494,27 @@ git commit -m "feat: support streamed powershell installation"
 - Review: `tests/test-install.sh`
 - Review: `tests/test-install.ps1`
 
-- [ ] **Step 1: Test local and streamed modes**
+- [ ] **Step 1: Run all available tests**
 
-Run all available suites and manually verify one local checkout invocation for each available shell.
+```bash
+bash -n install.sh
+bash tests/test-install.sh
+```
 
-- [ ] **Step 2: Inspect the full diff against `main`**
+```powershell
+./tests/test-install.ps1
+```
+
+- [ ] **Step 2: Inspect actual code against current `main`**
 
 ```bash
 git diff --check main...HEAD
 git diff main...HEAD -- install.sh install.ps1 tests/test-install.sh tests/test-install.ps1
 ```
 
-Expected: no whitespace errors; no active-install mutation occurs before bootstrap validation.
+Confirm no active-install path is touched before streamed checkout validation succeeds.
 
-- [ ] **Step 3: Commit any review fixes**
+- [ ] **Step 3: Commit review fixes only when needed**
 
 ```bash
 git add install.sh install.ps1 tests/test-install.sh tests/test-install.ps1
