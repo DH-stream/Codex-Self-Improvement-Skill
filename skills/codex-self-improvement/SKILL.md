@@ -7,33 +7,37 @@ description: Use when technical repository work changes files, when reviewing or
 
 ## Core principle
 
-Improve future work automatically from evidence. Be quiet, bounded, quality-preserving, and strict about private versus universal knowledge.
+Improve future work automatically from evidence. Stay bounded, quality-preserving, and strict about private versus universal knowledge.
 
-Resolve storage from the files under `~/.codex/self-improvement/`:
+Resolve storage from `~/.codex/self-improvement/`:
 
-- `PRIVATE_LOCATION` — personal taste, private evidence, and private history;
-- `UNIVERSAL_LOCATION` — public-compatible active patterns, candidates, mistakes, and history;
+- `PRIVATE_LOCATION` — writable personal taste, private evidence, history, and upstream queue;
+- `UNIVERSAL_LOCATION` — read-only installed snapshot of public upstream `main`;
 - `UPSTREAM_LOCATION` and `UPSTREAM_REPOSITORY` — checkout and repository used for universal draft PRs.
 
-Environment variables with matching names override location files. Read only relevant sections. During visual work, read private `UX_TASTE.md`; never read or publish unrelated private history.
+Environment variables named for those keys may override location files. Read only relevant sections. During visual work, read private `UX_TASTE.md`; never publish unrelated private history.
 
 ## Automatic trigger
 
-Before technical work, note `HEAD`, changed files, and intended verification.
+Before technical work, note `HEAD`, changed files, and intended verification. Retry pending `UPSTREAM_QUEUE.md` entries at most once per session or natural consolidation point when upstream access is available.
 
 After every user prompt:
 
-1. Did code, tests, config, scripts, migrations, CI, agent instructions, or skills change?
-   - No: stop.
-   - Yes: run the bounded post-change procedure.
-2. Does this prompt fix, review, or supersede earlier work?
-   - Yes: also run the correction retrospective.
+1. Evaluate durable explicit feedback and correction/review signals first, even when no file changed.
+   - Taste or personal preference → private taste contract.
+   - Review, blocker, or correction → correction retrospective.
+2. Did code, tests, config, scripts, migrations, CI, agent instructions, or skills change?
+   - Yes → run the bounded post-change procedure.
+   - No → skip technical efficiency reflection only; do not discard feedback from step 1.
 3. Classify material evidence:
-   - personal preference or private evidence → private memory only;
+   - private evidence → private memory only;
    - project fact → project-local only;
-   - qualified universal improvement → universal memory and upstream contribution;
+   - qualified universal improvement → dedicated upstream branch/draft PR;
+   - blocked universal contribution → private `UPSTREAM_QUEUE.md`;
    - weak or one-off observation → no write.
 4. Continue the normal response without narrating the retrospective.
+
+`UNIVERSAL_LOCATION` is never a second writable source. Universal changes are authored in the upstream worktree and enter the installed snapshot only through a later sync/install.
 
 **REQUIRED REFERENCES:**
 
@@ -45,33 +49,16 @@ After every user prompt:
 
 ## Write visibility
 
-Reflection is silent; actual writes are not. After any memory or skill write, add exactly one compact completion line naming changed files. When an upstream draft PR was opened or updated, append its reference.
-
-```text
-Self-improvement updated: `UX_TASTE.md`.
-Self-improvement updated: `ACTIVE_PATTERNS.md`; draft PR #12 opened.
-```
-
-Do not explain the lesson unless asked. Emit no notice when no memory or skill file changed.
+Reflection is silent; actual writes are not. After memory or skill writes, add one compact line naming changed files and any confirmed draft PR. Do not explain the lesson unless asked. Emit no notice when nothing changed.
 
 ## Consolidate automatically
 
-Consolidate after a commit, completed plan, final verification, strong correction, or handoff. Merge duplicates; promote, lower relevance, or supersede automatically. Never delete history.
+Consolidate after a commit, completed plan, final verification, strong correction, or handoff. Merge duplicates; promote, lower relevance, or supersede automatically. Preserve history.
 
 ## Quality firewall
 
-Optimization may change order, scope, checkpoints, and report length. It must never:
-
-- skip required RED/GREEN or final verification;
-- treat self-authored green tests as independent proof;
-- omit security, race, accessibility, or data-integrity checks;
-- review only descriptions when code and base comparison are required;
-- hide blockers or overstate completion;
-- alter established visual direction during an unrelated functional fix;
-- expose private memory in public diffs, commits, branches, issues, or PRs.
+Never optimize by skipping required RED/GREEN or final verification, treating self-authored tests as independent proof, omitting security/accessibility/data-integrity checks, reviewing only descriptions, hiding blockers, regressing accepted visuals, or exposing private memory publicly.
 
 ## Engine and universal upgrades
 
-One qualified universal improvement is enough; batching is not required. Follow the upstream contribution contract to create or update a dedicated branch and draft PR. Never push directly to `main` and never merge automatically.
-
-Change the engine only when evidence shows the procedure is missing or ambiguous. Add or update a pressure scenario, preserve quality gates, verify the change, and record it in the public update log.
+One qualified universal improvement is enough. Follow the upstream contract; never push directly to `main`, merge automatically, or create duplicate branches/PRs for the same contribution. Engine changes require a pressure scenario, fresh verification, privacy review, and public update-log entry.
