@@ -57,7 +57,7 @@ Consolidate after a commit, completed plan, final verification, strong correctio
 
 ## Quality firewall
 
-Never optimize by skipping required RED/GREEN or final verification, treating self-authored tests as independent proof, omitting security/accessibility/data-integrity checks, reviewing only descriptions, hiding blockers, regressing accepted visuals, or exposing private memory publicly.
+Never optimize by skipping required RED/GREEN or final verification, treating self-authored tests as independent proof, omitting security/accessibility/data-integrity checks, reviewing only descriptions, hiding blockers, regressing accepted visuals, or exposing private memory publicly. Default to one primary agent working inline; use subagents only for independent parallel work or targeted specialist review whose benefit exceeds coordination cost.
 
 ## Engine and universal upgrades
 
