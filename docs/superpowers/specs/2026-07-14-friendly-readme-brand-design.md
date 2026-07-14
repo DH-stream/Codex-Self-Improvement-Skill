@@ -157,21 +157,24 @@ irm https://raw.githubusercontent.com/DH-stream/Codex-Self-Improvement-Skill/mai
 
 The current installers are local-repository installers and cannot safely assume their companion `skills/`, `memory/`, and `install/` directories exist when streamed from `raw.githubusercontent.com`.
 
-Implementation must therefore add a verified remote-bootstrap path while preserving local installation:
+Implementation must add a verified remote-bootstrap mode while preserving local installation.
 
-- detect streamed/no-repository execution;
-- download the repository archive or a pinned release into a temporary directory;
-- verify that required files exist before activating anything;
-- run the bundled local installer from that temporary checkout;
-- clean up temporary files;
-- preserve the existing staged replacement and rollback guarantees;
-- fail without altering the active installation when download or validation fails.
+When invoked without a valid repository directory, each installer will:
 
-The PowerShell path must not depend on `$MyInvocation.MyCommand.Path` being a real file when invoked through `irm | iex`.
+1. use `SELF_IMPROVEMENT_BOOTSTRAP_REF` when set, otherwise default to `main`;
+2. download the matching GitHub repository archive into a newly created temporary directory;
+3. validate the extracted `skills/codex-self-improvement`, `memory/private-template`, and `install/AGENTS-snippet.md` paths;
+4. invoke the extracted local installer with the caller's configuration preserved;
+5. clean the temporary directory on success or failure;
+6. leave the active installation untouched when download, extraction, or validation fails.
 
-Both remote one-liners require executable regression tests or the closest available isolated equivalent. The README must not advertise the commands until those tests pass.
+The shell installer must support streamed execution without relying on `BASH_SOURCE[0]` being a repository file. The PowerShell installer must support `irm | iex` without relying on `$MyInvocation.MyCommand.Path` being a real file.
 
-A brief transparent note will say that the one-liner downloads and runs the repository installer. The advanced section will provide clone-based and pinned-ref alternatives.
+For deterministic isolated tests, both installers will accept `SELF_IMPROVEMENT_BOOTSTRAP_ARCHIVE` as an optional local archive path. This is a testing and advanced-use override; the normal one-liners download the GitHub archive.
+
+The README must not advertise the one-liners until remote-bootstrap tests pass.
+
+A brief transparent note will say that the one-liner downloads and runs the repository installer. The advanced section will provide clone-based and commit-pinned alternatives.
 
 ## Copy style
 
@@ -195,7 +198,7 @@ The design must work inside standard GitHub README rendering:
 - heading hierarchy supports navigation and accessibility;
 - no essential information exists only inside an image.
 
-## Implementation branches and commits
+## Implementation branch and files
 
 README and brand work will remain on:
 
@@ -207,14 +210,22 @@ Expected changed files:
 
 ```text
 README.md
-assets/brand/*
+assets/brand/hero.png
+assets/brand/bot-mark.png
+assets/brand/privacy-memory.png
+assets/brand/workflow.png
 install.sh
 install.ps1
 tests/test-install.sh
-possibly tests/test-install.ps1 or documented PowerShell test fixture
+tests/test-install-remote.sh
+tests/test-install-remote.ps1
 docs/superpowers/specs/2026-07-14-friendly-readme-brand-design.md
 docs/superpowers/plans/2026-07-14-friendly-readme-brand-plan.md
 ```
+
+`tests/test-install-remote.sh` will execute the streamed shell path against a local fixture archive and verify success, cleanup, configuration forwarding, and failure atomicity.
+
+`tests/test-install-remote.ps1` will express the equivalent Windows contract and will be executed when a PowerShell runtime is available. Until then, its unexecuted status must remain visible in the README verification section and PR.
 
 The remote installer behavior is a functional change and must receive RED/GREEN coverage before README copy claims it works.
 
@@ -224,9 +235,10 @@ Before opening the README PR:
 
 - render-check the README structure and relative image paths;
 - verify every advertised command exactly matches tested behavior;
-- run shell syntax and installer regression tests;
-- statically review and, when an appropriate runtime is available, execute PowerShell remote/local installation tests;
+- run shell syntax and local/remote installer regression tests;
+- statically review and, when an appropriate runtime is available, execute PowerShell local/remote installation tests;
 - verify remote failures leave existing installations untouched;
+- verify temporary bootstrap directories are removed on success and failure;
 - review actual code and full diff against current `main`;
 - check that no private memory or user-specific evidence appears in assets, copy, or metadata;
 - inspect generated images for spelling errors, illegible text, unwanted logos, and cropping on desktop/mobile widths;
