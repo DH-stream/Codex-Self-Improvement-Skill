@@ -1,58 +1,30 @@
 # Fire-and-Forget Self-Improvement Implementation Plan
 
+> **Status:** Completed as the initial engine plan. Its original single-memory installation design was superseded by [`2026-07-14-private-memory-upstream-sync-plan.md`](2026-07-14-private-memory-upstream-sync-plan.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:writing-skills` when changing the engine and `superpowers:test-driven-development` when adding executable behavior.
 
-**Goal:** Ship an installable global Codex skill with automatic post-change learning, correction retrospectives, universal work-pattern memory, and durable user-taste memory.
+**Goal:** Ship an installable global Codex skill with automatic post-change learning, correction retrospectives, universal work-pattern memory, and durable private user-taste memory.
 
-**Architecture:** A compact `SKILL.md` routes to detailed procedures. Persistent memory is separate from the installed engine so updates do not overwrite learning. A global `AGENTS.md` hook makes activation automatic across repositories.
+**Final architecture:** A compact `SKILL.md` routes to detailed procedures. The global `AGENTS.md` hook activates it across repositories. Public universal state, private local state, and the upstream GitHub checkout are separate. Later storage and upstream behavior are defined by the superseding plan.
 
-## Tasks
+## Completed phase-one work
 
-### 1. Record RED evidence and pressure scenarios
+- Recorded RED evidence for unbounded work, wrong green tests, and visual regressions.
+- Added stable invariants and repository/global routing.
+- Added the installable skill with post-change and correction triggers.
+- Added reflection, correction, memory-lifecycle, and taste-learning procedures.
+- Added compact universal patterns, recurring mistakes, history, and update logging.
+- Added idempotent shell and PowerShell installers.
+- Added structural and installer verification plus reusable pressure scenarios.
 
-- Document the observed multi-hour, multi-reset run.
-- Document the later blocker review that exposed missed runtime contracts.
-- Define pass/fail scenarios for silent triggering, correction learning, taste learning, stale-memory handling, and quality protection.
+## Superseded decisions
 
-### 2. Create stable invariants and routing
+The following original ideas must not be reintroduced:
 
-- Add `CORE.md`.
-- Add repository `AGENTS.md`.
-- Keep the global activation snippet short and explicit.
+- user taste stored in the public repository;
+- one combined global memory directory;
+- repository-backed personal memory;
+- fully silent behavior after an actual memory/skill write.
 
-### 3. Create the installable skill
-
-- Add frontmatter with trigger-only description.
-- Implement observable post-change triggering.
-- Route ordinary and correction retrospectives.
-- Keep routine output silent.
-- Protect quality gates.
-
-### 4. Add supporting procedures
-
-- Define reflection algorithm.
-- Define correction retrospective.
-- Define memory schema and lifecycle.
-- Define taste-learning evidence and conflict rules.
-
-### 5. Seed memory
-
-- Add compact active patterns.
-- Add candidates, history, recurring mistakes, and update log.
-- Seed only explicit, durable UX/taste preferences.
-- Keep project facts out of global memory.
-
-### 6. Add idempotent installers
-
-- Install/update engine files.
-- Seed memory only when files are absent.
-- Append the global activation hook once.
-- Support optional repository-backed memory.
-
-### 7. Verify
-
-- Check SKILL frontmatter and word count.
-- Check every referenced file exists.
-- Run installer dry-run/manual review on Windows and shell.
-- Run pressure scenarios with and without the skill when subagents are available.
-- Record any engine change in `memory/UPDATE_LOG.md`.
+Current behavior instead uses private local taste, public universal memory, persistent upstream retry state, automatic draft PRs, and compact filename/PR notices.
