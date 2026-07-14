@@ -22,19 +22,18 @@ Desired behavior:
 
 An implementation added canonical lifecycle state and many tests. A later independent review found several blockers:
 
-- persisted navigation metadata was not used to verify the actual tab URL;
-- successful async continuation required frozen identity and rejected legitimate forward progress;
-- panel adoption had the same frozen-identity issue;
-- content failure messages lacked exact reducer authority;
-- launch and step destination semantics were conflated;
-- a restricted surface could commit after terminal/navigation progress.
+- persisted state was not used to verify real runtime state;
+- asynchronous success handling rejected legitimate forward progress;
+- destructive messages lacked exact authority;
+- launch and step semantics were conflated;
+- a stale surface could commit after terminal or navigation progress.
 
 Some tests passed because they encoded the implementation's behavior rather than the intended end-to-end contract.
 
 Desired behavior:
 
 - compare new expectations with the requirement;
-- inspect complete affected paths across await boundaries;
+- inspect complete affected paths across asynchronous boundaries;
 - ask what evidence was available during the original implementation;
 - create a reusable preventive check.
 
@@ -46,7 +45,7 @@ Desired behavior:
 
 - treat established visual direction as a contract;
 - fix behavior without silent restyling;
-- learn explicit UX corrections globally with scope.
+- learn explicit UX corrections privately with scope.
 
 ## Baseline D — initial public/private storage gap
 
@@ -64,3 +63,18 @@ Desired behavior:
 - keep the GitHub repository limited to universal engine, schema, tests, and universal patterns;
 - allow one qualified universal improvement to open a verified draft PR automatically;
 - report only changed filenames and the draft PR reference unless more detail is requested.
+
+## Baseline E — pending upstream work stored in refreshable cache
+
+Review of the split-storage installer found that upstream failure initially fell back to universal `CANDIDATES.md`, while reinstall intentionally replaced universal cache files from the repository.
+
+Observed failure:
+
+- a sanitized but not-yet-pushed contribution could be erased by reinstall;
+- the fallback location did not match its required persistence lifetime.
+
+Desired behavior:
+
+- store pending upstream contributions in local `UPSTREAM_QUEUE.md`;
+- preserve that queue across reinstall and universal refresh;
+- retry it when upstream access becomes available.
