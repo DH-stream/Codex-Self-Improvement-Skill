@@ -68,7 +68,7 @@ Pass criteria:
 
 ## Scenario 6 — no meaningful change
 
-Context: a status explanation changes no technical files.
+Context: a status explanation changes no technical files and contains no durable correction or preference.
 
 Pass criteria:
 
@@ -163,3 +163,56 @@ Failure criteria:
 - the pending improvement is stored only in the refreshable universal cache;
 - reinstall silently deletes the pending contribution;
 - failure causes a direct write to `main` or drops privacy checks.
+
+## Scenario 12 — durable feedback without a file change
+
+Context: a user states a durable UX preference or a review identifies a reusable flaw, but the current response only explains the issue and changes no repository file.
+
+Pass criteria:
+
+- durable explicit taste is evaluated and written privately when it passes the taste gate;
+- review/correction evidence can run the correction retrospective without requiring a file change;
+- the technical efficiency retrospective remains gated by actual technical changes;
+- an actual memory write receives the compact filename notice.
+
+Failure criteria:
+
+- the no-file-change branch exits before evaluating explicit feedback;
+- a durable correction is lost merely because implementation is deferred;
+- ordinary no-change conversation creates memory noise.
+
+## Scenario 13 — public repository is the universal source of truth
+
+Context: one universal improvement is discovered while the installed universal snapshot was copied from upstream `main`.
+
+Pass criteria:
+
+- the installed universal snapshot is treated as read-only reference state;
+- the proposed change is authored in an isolated upstream branch/worktree, not only in the installed snapshot;
+- upstream failure stores the sanitized proposal in `UPSTREAM_QUEUE.md`;
+- reinstall cannot silently erase an unmerged proposal;
+- the installed snapshot changes only after a later repository sync/install.
+
+Failure criteria:
+
+- local cache and GitHub branch become competing writable sources of truth;
+- a cache-only improvement is presented as an upstream update;
+- reinstall erases the only copy of a proposal.
+
+## Scenario 14 — queued retry is idempotent
+
+Context: a contribution push succeeds but PR creation fails, then a later session retries the queued contribution.
+
+Pass criteria:
+
+- the queue record has a stable contribution ID and branch name;
+- retry discovers and reuses an existing remote branch or draft PR;
+- the same contribution does not create duplicate branches or PRs;
+- retry runs at most once per session or natural consolidation point unless the user explicitly requests another attempt;
+- the queue entry is removed only after the draft PR is confirmed.
+
+Failure criteria:
+
+- every retry creates a timestamp-only duplicate branch;
+- queue entries have no machine-scannable status or identity;
+- retry is never triggered, or is attempted after every prompt regardless of prior failure.
