@@ -37,6 +37,7 @@ Project-specific facts such as test commands, frameworks, filenames, or business
 │   ├── UX_TASTE.md
 │   ├── UX_TASTE_HISTORY.md
 │   ├── CANDIDATES.md
+│   ├── UPSTREAM_QUEUE.md
 │   └── UPDATE_LOG.md
 └── universal/
     ├── ACTIVE_PATTERNS.md
@@ -46,7 +47,7 @@ Project-specific facts such as test commands, frameworks, filenames, or business
     └── UPDATE_LOG.md
 ```
 
-The public repository contains universal state and neutral private templates. It contains no learned user taste.
+The public repository contains universal state and neutral private templates. It contains no learned user taste. `UPSTREAM_QUEUE.md` is local operational state containing only already-sanitized contributions waiting for upstream access.
 
 ## Trigger model
 
@@ -134,9 +135,20 @@ Rules:
 - each improvement uses a dedicated branch unless an open draft already represents the same change;
 - direct writes to `main` are forbidden;
 - automatic merge, approval, and ready-for-review transitions are forbidden;
-- upstream/authentication failure keeps the sanitized observation in universal candidates;
 - draft PRs disclose verification limitations;
 - private memory is outside the public contribution surface.
+
+When authentication or network access blocks the contribution:
+
+```text
+sanitized contribution
+→ local UPSTREAM_QUEUE.md
+→ preserved across reinstall/universal refresh
+→ retry on later authenticated run
+→ remove queue entry only after branch + draft PR confirmation
+```
+
+The queue never contains ordinary private observations or learned taste.
 
 ## Notification contract
 
@@ -145,6 +157,7 @@ Actual writes produce one line:
 ```text
 Self-improvement updated: `UX_TASTE.md`.
 Self-improvement updated: `ACTIVE_PATTERNS.md`; draft PR #12 opened.
+Self-improvement updated: `UPSTREAM_QUEUE.md`; upstream draft PR failed.
 ```
 
 The line names every changed memory/skill file. It does not restate the lesson, prompt, plan, or retrospective. No file change means no notice.
@@ -170,7 +183,7 @@ Each install:
 - refreshes engine files;
 - refreshes public universal state from the checkout;
 - seeds missing private files from neutral templates;
-- preserves existing private files;
+- preserves existing private files, including `UPSTREAM_QUEUE.md`;
 - migrates taste files from the first installer layout;
 - records private, universal, checkout, and repository locations;
 - updates one marked global `AGENTS.md` activation block.
