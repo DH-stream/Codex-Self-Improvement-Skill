@@ -24,7 +24,7 @@ No extra command is required solely to create reflection evidence.
 2. Which action produced real evidence?
 3. Which repeated action produced no new information?
 4. Which smaller or earlier check could preserve the same quality?
-5. Which memory class fits: universal pattern, user taste, recurring mistake, engine gap, project fact, or no lesson?
+5. Which memory class fits: universal pattern, user taste/private evidence, recurring mistake, engine gap, project fact, or no lesson?
 
 ## Classification
 
@@ -32,10 +32,11 @@ No extra command is required solely to create reflection evidence.
 |---|---|
 | Project fact | Keep project-local; no global write |
 | One-off event | No write |
-| Universal candidate | Add or update candidate/provisional pattern |
-| User taste | Apply taste-learning contract |
-| Recurring mistake | Add evidence and preventive check |
-| Engine gap | Create an engine-upgrade candidate |
+| Private observation | Write only under `PRIVATE_LOCATION` when durable |
+| User taste | Apply the private taste-learning contract |
+| Universal candidate/pattern | Write public-safe data under `UNIVERSAL_LOCATION` and apply upstream contribution |
+| Recurring universal mistake | Add public-safe evidence and a preventive check |
+| Engine gap | Create a public-safe engine upgrade with a pressure scenario |
 
 ## Write gate
 
@@ -48,8 +49,22 @@ A memory update requires all of these properties:
 - behavior-changing;
 - quality-preserving.
 
-Otherwise the result is `no_write`.
+A universal write additionally requires:
+
+- applicability across repositories or technologies;
+- safe anonymization without losing the action;
+- no personal, proprietary, secret, or project-specific dependency.
+
+Otherwise the result is `no_write` or private-only storage.
+
+## Upstream threshold
+
+One qualified universal improvement is enough to propose upstream. Do not wait for batching. Store it as provisional when confidence is not yet confirmed, then follow `upstream-contribution.md`.
 
 ## Visibility
 
-Routine result: silent. A normal completion report may mention only material new lessons and must not restate the prompt, plan, or full diff as learning.
+Routine reasoning remains silent.
+
+When no memory or skill file changed, emit no self-improvement notice.
+
+When files changed, use one compact notice from `memory-schema.md` naming only the changed file(s) and any upstream draft PR. Do not explain the lesson unless asked.
