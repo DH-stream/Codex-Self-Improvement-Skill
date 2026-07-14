@@ -23,3 +23,4 @@ Load this before modifying the self-improvement engine or its memory.
 19. **Installer replacements are validated and staged before active files are changed.**
 20. **Engine changes are tracked and pressure-tested; ordinary private learning updates private memory.**
 21. **Never claim success without fresh verification appropriate to the task.**
+22. **Routine repository execution defaults to one primary agent; subagents require independent parallelism or specialist risk that justifies their coordination cost.**

@@ -6,10 +6,86 @@ fail() {
   exit 1
 }
 
+has_repo_layout() {
+  local root="$1"
+  [[ -f "$root/install.sh" &&
+     -d "$root/skills/codex-self-improvement" &&
+     -d "$root/memory/private-template" &&
+     -f "$root/install/AGENTS-snippet.md" ]]
+}
+
+resolve_script_root() {
+  local source="${BASH_SOURCE[0]:-}"
+  [[ -n "$source" && -f "$source" ]] || return 1
+  cd "$(dirname "$source")" && pwd
+}
+
+bootstrap_streamed_install() {
+  local repository checkout explicit_checkout temp_checkout="" current_origin backup_checkout
+  repository="${UPSTREAM_REPOSITORY:-${SELF_IMPROVEMENT_UPSTREAM_REPOSITORY:-https://github.com/DH-stream/Codex-Self-Improvement-Skill.git}}"
+  explicit_checkout="${UPSTREAM_LOCATION:-${SELF_IMPROVEMENT_UPSTREAM_CHECKOUT:-}}"
+  checkout="${explicit_checkout:-$CODEX_HOME/self-improvement/upstream-checkout}"
+
+  [[ -n "$repository" ]] || fail "upstream repository is empty"
+
+  if [[ -n "$explicit_checkout" ]]; then
+    has_repo_layout "$checkout" || fail "supplied upstream checkout is incomplete: $checkout"
+  else
+    command -v git >/dev/null 2>&1 || fail "git is required for streamed installation"
+    mkdir -p "$(dirname "$checkout")"
+
+    if git -C "$checkout" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      current_origin="$(git -C "$checkout" remote get-url origin 2>/dev/null)" || fail "managed upstream checkout has no origin remote"
+      if [[ "$current_origin" != "$repository" ]]; then
+        temp_checkout="${checkout}.install.$$"
+        backup_checkout="${checkout}.backup.$$"
+        cleanup_bootstrap() {
+          [[ -z "$temp_checkout" ]] || rm -rf "$temp_checkout"
+          [[ ! -e "$backup_checkout" ]] || rm -rf "$backup_checkout"
+        }
+        trap cleanup_bootstrap EXIT
+        rm -rf "$temp_checkout" "$backup_checkout"
+        git clone --quiet --branch main --single-branch "$repository" "$temp_checkout" || fail "could not clone replacement upstream repository"
+        has_repo_layout "$temp_checkout" || fail "replacement upstream checkout is incomplete"
+        mv "$checkout" "$backup_checkout" || fail "could not stage existing upstream checkout"
+        if ! mv "$temp_checkout" "$checkout"; then
+          mv "$backup_checkout" "$checkout" || true
+          fail "could not activate replacement upstream checkout"
+        fi
+        temp_checkout=""
+        rm -rf "$backup_checkout"
+      else
+        git -C "$checkout" fetch origin main || fail "could not fetch upstream main"
+        git -C "$checkout" checkout main >/dev/null 2>&1 || fail "could not checkout upstream main"
+        git -C "$checkout" pull --ff-only origin main || fail "upstream checkout is not fast-forwardable"
+        has_repo_layout "$checkout" || fail "updated upstream checkout is incomplete: $checkout"
+      fi
+    elif [[ -e "$checkout" ]]; then
+      fail "managed upstream checkout exists but is not a Git repository: $checkout"
+    else
+      temp_checkout="${checkout}.install.$$"
+      cleanup_bootstrap() {
+        [[ -z "$temp_checkout" ]] || rm -rf "$temp_checkout"
+      }
+      trap cleanup_bootstrap EXIT
+      rm -rf "$temp_checkout"
+      git clone --quiet --branch main --single-branch "$repository" "$temp_checkout" || fail "could not clone upstream repository"
+      has_repo_layout "$temp_checkout" || fail "cloned upstream checkout is incomplete"
+      mv "$temp_checkout" "$checkout" || fail "could not activate upstream checkout"
+      temp_checkout=""
+    fi
+  fi
+
+  exec env UPSTREAM_LOCATION="$checkout" UPSTREAM_REPOSITORY="$repository" bash "$checkout/install.sh"
+}
+
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 [[ -n "$CODEX_HOME" && "$CODEX_HOME" != "/" ]] || fail "CODEX_HOME must be a non-root directory"
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(resolve_script_root || true)"
+if [[ -z "$REPO_ROOT" ]] || ! has_repo_layout "$REPO_ROOT"; then
+  bootstrap_streamed_install
+fi
 SKILL_SOURCE="$REPO_ROOT/skills/codex-self-improvement"
 MEMORY_SOURCE="$REPO_ROOT/memory"
 PRIVATE_TEMPLATE="$MEMORY_SOURCE/private-template"
@@ -49,7 +125,6 @@ AGENTS_INPUT="$STAGE_ROOT/AGENTS.input"
 AGENTS_STAGE="$STAGE_ROOT/AGENTS.md"
 mkdir -p "$SKILL_STAGE" "$UNIVERSAL_STAGE"
 
-# Build complete replacements before touching the active installation.
 cp -R "$SKILL_SOURCE"/. "$SKILL_STAGE"/
 for source in "$MEMORY_SOURCE"/*; do
   [[ -f "$source" ]] || continue
@@ -96,7 +171,6 @@ END {
 [[ "$(grep -Fxc "$START_MARKER" "$AGENTS_STAGE" || true)" == "1" ]] || fail "generated AGENTS.md has invalid start marker count"
 [[ "$(grep -Fxc "$END_MARKER" "$AGENTS_STAGE" || true)" == "1" ]] || fail "generated AGENTS.md has invalid end marker count"
 
-# Preserve taste learned by the first installer layout before applying templates.
 for name in UX_TASTE.md UX_TASTE_HISTORY.md; do
   legacy="$LEGACY_MEMORY/$name"
   destination="$PRIVATE_TARGET/$name"
@@ -105,7 +179,6 @@ for name in UX_TASTE.md UX_TASTE_HISTORY.md; do
   fi
 done
 
-# Private state is seeded once and never overwritten by reinstall or sync.
 for source in "$PRIVATE_TEMPLATE"/*; do
   [[ -f "$source" ]] || continue
   destination="$PRIVATE_TARGET/$(basename "$source")"

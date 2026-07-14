@@ -18,3 +18,6 @@
 - Added stable proposal IDs, deterministic branches, bounded retries, and duplicate prevention.
 - Added installer preflight, staged replacement, complete snapshot refresh, and a Python-free shell path.
 - Added executable shell installer regression coverage with observed failing and passing runs.
+- Made single-agent inline execution the default and limited subagents to justified parallel or specialist work.
+- Added safe streamed one-line installers backed by persistent validated checkouts.
+- Added a friendly README landing page and reusable learning-bot brand kit.

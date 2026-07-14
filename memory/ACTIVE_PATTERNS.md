@@ -4,7 +4,7 @@ Read only categories relevant to the current work.
 
 ## Index
 
-- Planning/execution: `execution-001`
+- Planning/execution: `execution-001`, `execution-002`
 - Testing/verification: `verification-001`
 - Review: `review-001`
 - UI implementation: `ux-implementation-001`
@@ -18,6 +18,16 @@ Read only categories relevant to the current work.
 - Action: finish, focus-test, commit, and preserve a review boundary before expanding scope.
 - Never: replace final integration verification with isolated checkpoints.
 - Evidence: one multi-hour run consumed two usage resets before review.
+
+## execution-002 — Default to one primary agent
+
+- Status: confirmed
+- Confidence: high
+- Relevance: high
+- Use when: executing a plan or multi-step repository change.
+- Action: keep one primary agent working inline through natural verified checkpoints; dispatch subagents only for genuinely independent parallel work or targeted specialist review whose expected benefit exceeds coordination cost.
+- Never: create one worker and one reviewer for every routine task by default.
+- Evidence: durable explicit user correction after repeated subagent-per-task workflows added substantial latency.
 
 ## verification-001 — Verify the requirement, not only the new test
 

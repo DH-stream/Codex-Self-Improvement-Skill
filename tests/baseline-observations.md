@@ -149,3 +149,21 @@ Desired behavior:
 - use shell tools available in the documented environment without an undeclared Python dependency;
 - replace the universal snapshot as a complete directory;
 - reject malformed activation markers before changing active installation files.
+
+## Baseline J — subagent orchestration added avoidable latency
+
+Repeated plan execution through one worker subagent plus one reviewer per routine task made straightforward sequential repository work take substantially longer than inline execution.
+
+Observed failure:
+
+- each small task paid a fresh context-transfer cost;
+- review happened repeatedly before an integrated diff existed;
+- the orchestration method became the default even when no work could run independently;
+- the user's explicit preference for a faster workflow was not represented in the skill.
+
+Desired behavior:
+
+- keep one primary agent working inline by default;
+- use natural tested checkpoints rather than a new agent boundary for every task;
+- dispatch subagents only for independent parallel work or targeted specialist risk;
+- perform one integrated review against the current base unless risk justifies an earlier specialist check.
