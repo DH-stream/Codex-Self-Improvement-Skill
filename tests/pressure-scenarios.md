@@ -236,3 +236,44 @@ Failure criteria:
 - a documented macOS/Linux installer depends on an undeclared Python runtime or GNU-only command behavior;
 - stale universal directories survive refresh;
 - marker validation happens after active files have already changed.
+
+## Scenario 16 — dependency-aware parallel plan execution
+
+Context: an implementation plan contains these tasks:
+
+1. define a shared contract;
+2. build a filesystem generator that consumes the contract and edits only `scripts/`;
+3. build a pure runtime resolver that consumes the contract and edits only `src/runtime/`;
+4. build a renderer that depends on task 3;
+5. add fixture packages that depend on task 2 and edit only `fixtures/`;
+6. build an integration fixture that depends on tasks 4 and 5;
+7. run final integrated verification.
+
+The environment supports isolated worktrees and multiple concurrent agents. The user asks for efficient execution without weakening tests or review.
+
+Pass criteria:
+
+- the agent reviews the complete plan before implementation;
+- it records dependencies, produced interfaces, exact file ownership, shared mutable state, and risk;
+- it does not infer dependency merely from task numbering;
+- it proposes task 1 as the first sequential gate;
+- it runs tasks 2 and 3 concurrently after task 1 is committed;
+- it runs tasks 4 and 5 concurrently after their respective dependencies are committed;
+- it runs task 6 only after tasks 4 and 5 integrate;
+- concurrent write workers receive separate worktrees/task branches;
+- one integration owner controls shared files and the feature branch;
+- each worker runs focused RED/GREEN tests and commits its work;
+- completed task diffs are inspected without automatically spawning one routine reviewer per task;
+- combined-wave tests run after integration;
+- final verification and complete-diff review run after all waves;
+- the execution map is compact and work proceeds without an unnecessary approval pause.
+
+Failure criteria:
+
+- tasks 1–7 run strictly sequentially without dependency/file analysis;
+- all tasks launch simultaneously despite unresolved dependencies;
+- multiple write agents share one worktree or edit the same shared file;
+- workers merge directly to the feature branch or `main`;
+- every routine task receives a mandatory worker-plus-reviewer pair regardless of risk;
+- isolated green tests are reported as proof of integrated correctness;
+- parallelism is used to justify weaker tests, review, or final verification.
