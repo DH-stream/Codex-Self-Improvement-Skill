@@ -1,6 +1,6 @@
 ---
 name: codex-self-improvement
-description: Use when technical repository work changes files, when reviewing or correcting earlier implementation, or when explicit or repeated user feedback reveals durable workflow, quality, UX, design, color, copy, interaction, or visual preferences.
+description: Use when technical repository work changes files, when executing multi-step repository plans, when reviewing or correcting earlier implementation, or when explicit or repeated user feedback reveals durable workflow, quality, UX, design, color, copy, interaction, or visual preferences.
 ---
 
 # Codex Self-Improvement
@@ -19,7 +19,7 @@ Environment variables named for those keys may override location files. Read onl
 
 ## Automatic trigger
 
-Before technical work, note `HEAD`, changed files, and intended verification. Retry pending `UPSTREAM_QUEUE.md` entries at most once per session or natural consolidation point when upstream access is available.
+Before technical work, note `HEAD`, changed files, and intended verification. Retry pending `UPSTREAM_QUEUE.md` entries at most once per session or natural consolidation point when upstream access is available. Before executing a plan with two or more tasks, run the plan-execution gate below.
 
 After every user prompt:
 
@@ -39,8 +39,23 @@ After every user prompt:
 
 `UNIVERSAL_LOCATION` is never a second writable source. Universal changes are authored in the upstream worktree and enter the installed snapshot only through a later sync/install.
 
+## Plan-execution gate
+
+For every multi-task implementation plan, read `references/parallel-plan-execution.md` before dispatching workers.
+
+1. Review dependencies, produced interfaces, exact file ownership, shared mutable state, and specialist risk.
+2. Build a task DAG and bounded execution waves. Task numbering alone is not a dependency.
+3. No safe parallel width → keep one primary agent inline through verified checkpoints.
+4. Safe independent width → dispatch the ready tasks concurrently in isolated worktrees/task branches.
+5. Keep one integration owner for the feature branch. Integrate reviewed commits in topological order and test the combined wave.
+6. Use specialist reviewers only when risk or independent judgment justifies the coordination cost; do not recreate one implementer-plus-reviewer pair for every routine task.
+7. Finish with complete-diff review and fresh integrated verification.
+
+Proceed automatically after the compact execution map unless there is a real plan contradiction, security-sensitive installation, destructive action, missing authority, or required asset/user approval.
+
 **REQUIRED REFERENCES:**
 
+- `references/parallel-plan-execution.md` for multi-task plans
 - `references/reflection-procedure.md`
 - `references/correction-retrospective.md` for corrections/blockers
 - `references/memory-schema.md` for writes and notices
@@ -57,7 +72,7 @@ Consolidate after a commit, completed plan, final verification, strong correctio
 
 ## Quality firewall
 
-Never optimize by skipping required RED/GREEN or final verification, treating self-authored tests as independent proof, omitting security/accessibility/data-integrity checks, reviewing only descriptions, hiding blockers, regressing accepted visuals, or exposing private memory publicly. Default to one primary agent working inline; use subagents only for independent parallel work or targeted specialist review whose benefit exceeds coordination cost.
+Never optimize by skipping required RED/GREEN or final verification, treating self-authored tests as independent proof, omitting security/accessibility/data-integrity checks, reviewing only descriptions, hiding blockers, regressing accepted visuals, exposing private memory publicly, dispatching dependent work concurrently, sharing one worktree between write agents, or calling isolated green tasks integrated proof.
 
 ## Engine and universal upgrades
 
