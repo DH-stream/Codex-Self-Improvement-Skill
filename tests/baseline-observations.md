@@ -163,7 +163,28 @@ Observed failure:
 
 Desired behavior:
 
-- keep one primary agent working inline by default;
+- keep one primary agent working inline when no safe parallel width exists;
 - use natural tested checkpoints rather than a new agent boundary for every task;
-- dispatch subagents only for independent parallel work or targeted specialist risk;
-- perform one integrated review against the current base unless risk justifies an earlier specialist check.
+- dispatch specialist reviewers only when risk or independent judgment justifies them;
+- perform integrated review against the current base.
+
+## Baseline K — task numbering caused avoidable serial execution
+
+A multi-task implementation plan contained a contract task followed by two independent implementation domains, then later integration tasks. The execution workflow treated the numbered list as a strict sequence and ran one coding agent at a time without first classifying dependencies or file ownership.
+
+Observed failure:
+
+- no task dependency graph or shared-file analysis was produced;
+- independent generator and runtime work waited for each other unnecessarily;
+- isolated worktrees and bounded parallel waves were not considered;
+- the correction for excessive subagent overhead had overfit toward serial execution;
+- wall-clock efficiency depended on the plan author manually requesting parallelism.
+
+Desired behavior:
+
+- review the complete plan topology before implementation;
+- distinguish true dependencies from task numbering;
+- run ready tasks with disjoint write ownership concurrently in isolated worktrees;
+- keep one integration owner for the feature branch and shared files;
+- integrate in dependency order and verify each combined wave;
+- retain inline execution when parallel width is absent or coordination cost exceeds the ready work.
