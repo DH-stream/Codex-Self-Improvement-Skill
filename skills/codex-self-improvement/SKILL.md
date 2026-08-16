@@ -44,12 +44,12 @@ After every user prompt:
 For every multi-task implementation plan, read `references/parallel-plan-execution.md` before dispatching workers.
 
 1. Review dependencies, produced interfaces, exact file ownership, shared mutable state, and specialist risk.
-2. Build a task DAG and bounded execution waves. Task numbering alone is not a dependency.
-3. No safe parallel width → keep one primary agent inline through verified checkpoints.
-4. Safe independent width → dispatch the ready tasks concurrently in isolated worktrees/task branches.
-5. Keep one integration owner for the feature branch. Integrate reviewed commits in topological order and test the combined wave.
-6. Use specialist reviewers only when risk or independent judgment justifies the coordination cost; do not recreate one implementer-plus-reviewer pair for every routine task.
-7. Finish with complete-diff review and fresh integrated verification.
+2. Keep the primary implementation in the main agent inline. Task numbering alone is not a dependency; continue to the next safe task as soon as the current logical part is committed.
+3. For every completed logical part, launch an independent review subagent against that exact snapshot while the main agent continues implementing later independent work. Reviews inspect actual code/diffs and do not edit.
+4. If a review returns actionable findings, launch a separate fix subagent for that review. The reviewer never fixes its own findings. Keep fix work isolated and non-blocking unless it directly conflicts with or is required by the main agent's next work.
+5. The main agent remains the integration owner. Integrate returned fixes deliberately, resolve overlaps, and keep later work rebased on the authoritative branch state.
+6. Parallel review/fix pipelines may overlap across completed parts when their scopes are independent. Never let multiple write agents race the same files or shared state.
+7. After implementation plus all review/fix work completes, the main agent reviews the entire final branch itself against current `main`, inspects all subagent changes, and runs fresh integrated verification.
 
 Proceed automatically after the compact execution map unless there is a real plan contradiction, security-sensitive installation, destructive action, missing authority, or required asset/user approval.
 
@@ -72,7 +72,7 @@ Consolidate after a commit, completed plan, final verification, strong correctio
 
 ## Quality firewall
 
-Never optimize by skipping required RED/GREEN or final verification, treating self-authored tests as independent proof, omitting security/accessibility/data-integrity checks, reviewing only descriptions, hiding blockers, regressing accepted visuals, exposing private memory publicly, dispatching dependent work concurrently, sharing one worktree between write agents, or calling isolated green tasks integrated proof.
+Never optimize by skipping required RED/GREEN or final verification, treating self-authored tests as independent proof, omitting security/accessibility/data-integrity checks, reviewing only descriptions, hiding blockers, regressing accepted visuals, exposing private memory publicly, letting reviewers fix their own findings, blocking independent main-agent work on background reviews, sharing one write worktree between concurrent writers, dispatching conflicting fixes concurrently, or calling isolated green tasks integrated proof.
 
 ## Engine and universal upgrades
 
