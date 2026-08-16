@@ -23,4 +23,4 @@ Load this before modifying the self-improvement engine or its memory.
 19. **Installer replacements are validated and staged before active files are changed.**
 20. **Engine changes are tracked and pressure-tested; ordinary private learning updates private memory.**
 21. **Never claim success without fresh verification appropriate to the task.**
-22. **Before multi-task execution, review dependencies, file ownership, and shared state; run safe independent work in bounded parallel worktrees, keep coupled work sequential, and preserve integrated verification.**
+22. **For multi-task implementation, the main agent builds inline while independent review and separate review-fix agents run behind completed snapshots; background review must not block safe forward implementation, and the main agent owns final integrated review against current `main`.**
