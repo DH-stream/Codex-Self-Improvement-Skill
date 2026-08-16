@@ -1,5 +1,13 @@
 # Update log
 
+## 2026-08-16
+
+- Replaced blocking/delegated multi-task orchestration with a main-agent inline implementation model.
+- Added independent review subagents for each completed logical snapshot without blocking later safe implementation work.
+- Added separate isolated fixer subagents for actionable review findings; reviewers never fix their own findings.
+- Kept dependency/write-conflict analysis and made the main agent the final integration reviewer against current `main` after all background pipelines return.
+- Added anonymized RED evidence and a pressure scenario for the non-blocking review/fix pipeline.
+
 ## 2026-07-14
 
 - Created the fire-and-forget technical-change trigger.
