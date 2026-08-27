@@ -4,7 +4,7 @@ Read only categories relevant to the current work.
 
 ## Index
 
-- Planning/execution: `execution-001`, `execution-002`, `execution-003`
+- Planning/execution: `execution-001`, `execution-002`, `execution-003`, `execution-004`
 - Testing/verification: `verification-001`
 - Review: `review-001`
 - UI implementation: `ux-implementation-001`
@@ -21,24 +21,36 @@ Read only categories relevant to the current work.
 
 ## execution-002 — Default to one primary agent when parallel width is absent
 
-- Status: confirmed
+- Status: superseded
 - Confidence: high
-- Relevance: high
+- Relevance: historical
 - Use when: executing a plan or multi-step repository change whose ready work is coupled, overlapping, too small, or exploratory.
 - Action: keep one primary agent working inline through natural verified checkpoints; dispatch targeted specialist review only when its expected benefit exceeds coordination cost.
 - Never: create one worker and one reviewer for every routine task by default.
 - Evidence: durable explicit user correction after repeated subagent-per-task workflows added substantial latency.
 - Later assessment (2026-07-18): this pattern does not justify serializing independent task domains; `execution-003` governs plans with safe parallel width.
+- Later assessment (2026-08-16): the latency problem came from blocking/delegated orchestration, not from independent review itself. Superseded by `execution-004`, which keeps primary implementation inline while review/fix work runs behind it.
 
 ## execution-003 — Review topology, then run safe parallel waves
 
-- Status: confirmed
+- Status: superseded
 - Confidence: high
-- Relevance: high
+- Relevance: medium
 - Use when: an implementation plan has two or more tasks and some work may be independent.
 - Action: build a dependency/file-ownership/shared-state graph first; dispatch ready disjoint tasks concurrently in isolated worktrees under one integration owner; integrate in dependency order and test each combined wave.
 - Never: infer dependencies from task numbering, share one write worktree, race shared files, or treat isolated green tasks as integrated proof.
 - Evidence: durable explicit correction after a numbered plan with independent domains was executed strictly sequentially without topology review.
+- Later assessment (2026-08-16): retain the topology/conflict analysis, but do not delegate the primary implementation plan by default. `execution-004` supersedes the execution model while preserving dependency and write-conflict checks.
+
+## execution-004 — Keep implementation inline and pipeline review/fix behind it
+
+- Status: confirmed
+- Confidence: high
+- Relevance: high
+- Use when: executing a multi-part repository implementation where completed logical snapshots can be reviewed while later safe work continues.
+- Action: the main agent implements the primary plan inline; launch an independent non-editing reviewer for every completed logical snapshot; if findings are actionable, launch a different isolated fixer; keep these pipelines non-blocking unless dependency or write conflict requires waiting; then have the main agent perform the final full review against current `main` and integrated verification.
+- Never: stop safe main-agent progress merely to await review, let a reviewer fix its own findings, race overlapping fix agents, or treat subagent output as final proof.
+- Evidence: durable explicit workflow correction after a blocking review model was identified as unnecessary wall-clock latency while independent review/fix work could safely run concurrently.
 
 ## verification-001 — Verify the requirement, not only the new test
 
